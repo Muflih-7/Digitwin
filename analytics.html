@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DigitTwin — Analytics</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .chart-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+    .chart-box { background:var(--bg2); border:1px solid var(--border); border-radius:6px; padding:18px; }
+    .chart-title { font-size:0.78rem; font-weight:600; color:var(--t2); text-transform:uppercase; letter-spacing:0.03em; margin-bottom:4px; }
+    .chart-sub { font-size:0.68rem; color:var(--t3); margin-bottom:16px; }
+    .bar-chart { display:flex; align-items:flex-end; gap:8px; height:140px; padding-bottom:24px; position:relative; }
+    .bar-chart::after { content:''; position:absolute; bottom:24px; left:0; right:0; height:1px; background:var(--border); }
+    .bar-col { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; height:100%; justify-content:flex-end; }
+    .bar-block { width:100%; border-radius:3px 3px 0 0; transition:height 0.8s ease; min-height:2px; }
+    .bar-lbl { font-size:0.6rem; color:var(--t3); font-family:var(--mono); white-space:nowrap; }
+    .bar-val { font-size:0.62rem; color:var(--t2); font-family:var(--mono); font-weight:500; }
+    .sparkline { display:flex; align-items:flex-end; gap:3px; height:60px; }
+    .spark { flex:1; border-radius:1px 1px 0 0; min-height:2px; background:var(--blue-lt); opacity:0.5; transition:opacity 0.2s; }
+    .spark:hover { opacity:1; }
+    .metric-row { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:16px; }
+    .metric-card { background:var(--bg2); border:1px solid var(--border); border-radius:6px; padding:16px; }
+    .mc-val { font-size:1.6rem; font-weight:700; color:var(--t1); margin-bottom:4px; letter-spacing:-0.02em; }
+    .mc-lbl { font-size:0.68rem; color:var(--t3); font-weight:500; text-transform:uppercase; letter-spacing:0.04em; }
+    .mc-change { font-size:0.68rem; margin-top:6px; }
+    .mc-up{color:var(--green-lt);} .mc-down{color:var(--red-lt);}
+    .zone-table { width:100%; border-collapse:collapse; }
+    .zone-table th { font-size:0.65rem; font-weight:600; color:var(--t3); text-transform:uppercase; letter-spacing:0.05em; padding:8px 12px; text-align:left; border-bottom:1px solid var(--border); }
+    .zone-table td { padding:10px 12px; font-size:0.78rem; color:var(--t2); border-bottom:1px solid var(--border); }
+    .zone-table tr:last-child td { border-bottom:none; }
+    .zone-table tr:hover td { background:rgba(255,255,255,0.02); }
+  </style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="nav-logo">Digit<span>Twin</span></div>
+  <div class="nav-links">
+    <a class="nav-link" href="dashboard.html">Overview</a>
+    <a class="nav-link" href="twin.html">3D Twin</a>
+    <a class="nav-link active" href="analytics.html">Analytics</a>
+    <a class="nav-link" href="maintenance.html">Maintenance</a>
+  </div>
+  <div class="nav-right">
+    <div class="nav-time" id="navClock">--:--:--</div>
+    <div class="nav-user"><div class="user-av">OP</div><div class="user-nm">Operator</div></div>
+  </div>
+</nav>
+<nav class="sidenav">
+  <div class="side-section">
+    <div class="side-label">Monitor</div>
+    <a class="side-link" href="dashboard.html">Overview</a>
+    <a class="side-link" href="twin.html">3D Digital Twin</a>
+    <a class="side-link" href="sensors.html">Sensor Network <span class="side-chip sc-blue">48</span></a>
+    <a class="side-link" href="alerts.html">Live Alerts <span class="side-chip sc-red">3</span></a>
+  </div>
+  <div class="side-section">
+    <div class="side-label">Analytics</div>
+    <a class="side-link active" href="analytics.html">Performance</a>
+    <a class="side-link" href="history.html">Historical Data</a>
+    <a class="side-link" href="faults.html">Fault Analysis</a>
+  </div>
+  <div class="side-section">
+    <div class="side-label">Platforms</div>
+    <a class="side-ext" href="https://factoryonline-production.up.railway.app/" target="_blank">Smart Factory <span class="side-ext-icon">↗</span></a>
+    <a class="side-ext" href="https://predictivemaintenance-91fu.onrender.com/" target="_blank">Pred. Maintenance <span class="side-ext-icon">↗</span></a>
+    <a class="side-ext" href="https://mechsim.onrender.com/" target="_blank">MECHSIM <span class="side-ext-icon">↗</span></a>
+    <a class="side-ext" href="https://optimalprint.onrender.com/" target="_blank">OptimalPrint <span class="side-ext-icon">↗</span></a>
+  </div>
+  <div class="side-section">
+    <div class="side-label">System</div>
+    <a class="side-link" href="settings.html">Configuration</a>
+    <a class="side-link" href="reports.html">Reports</a>
+  </div>
+  <div class="side-bottom"><a class="side-logout" href="index.html">← Sign Out</a></div>
+</nav>
+<main class="main">
+  <div class="page-title fade-in">Performance Analytics</div>
+  <div class="page-sub fade-in">DigitTwin / Analytics / Performance — Last 30 Days</div>
+  <div class="metric-row fade-in d1">
+    <div class="metric-card"><div class="mc-val" style="color:var(--blue-lt)">87.3%</div><div class="mc-lbl">Overall OEE</div><div class="mc-change mc-up">▲ 2.1% from last month</div></div>
+    <div class="metric-card"><div class="mc-val" style="color:var(--green-lt)">99.2%</div><div class="mc-lbl">Platform Uptime</div><div class="mc-change mc-up">▲ 0.3% from last month</div></div>
+    <div class="metric-card"><div class="mc-val" style="color:var(--amber-lt)">4.2</div><div class="mc-lbl">MTBF (days)</div><div class="mc-change mc-up">▲ 0.8d from last month</div></div>
+    <div class="metric-card"><div class="mc-val" style="color:var(--teal-lt)">1.4h</div><div class="mc-lbl">Mean Time To Repair</div><div class="mc-change mc-down">▼ +0.2h from last month</div></div>
+    <div class="metric-card"><div class="mc-val">12</div><div class="mc-lbl">Predicted Failures (30d)</div><div class="mc-change mc-down">▼ 3 more than last month</div></div>
+    <div class="metric-card"><div class="mc-val" style="color:var(--green-lt)">£84k</div><div class="mc-lbl">Downtime Cost Avoided</div><div class="mc-change mc-up">▲ £12k from last month</div></div>
+  </div>
+  <div class="chart-grid fade-in d2">
+    <div class="chart-box">
+      <div class="chart-title">OEE by Zone — This Month</div>
+      <div class="chart-sub">Availability × Performance × Quality</div>
+      <div class="bar-chart" id="oeeBar"></div>
+    </div>
+    <div class="chart-box">
+      <div class="chart-title">Daily Machine Utilisation</div>
+      <div class="chart-sub">Average across all 26 machines — last 14 days</div>
+      <div class="sparkline" id="utilSpark"></div>
+      <div style="display:flex;justify-content:space-between;margin-top:8px;">
+        <span style="font-size:0.62rem;color:var(--t3);font-family:var(--mono)">14 days ago</span>
+        <span style="font-size:0.62rem;color:var(--t3);font-family:var(--mono)">Today</span>
+      </div>
+    </div>
+  </div>
+  <div class="chart-box fade-in d3" style="margin-bottom:16px;">
+    <div class="card-header" style="padding:0 0 14px 0;border-bottom:1px solid var(--border);margin-bottom:16px;">
+      <span class="card-title">Zone Performance Breakdown</span>
+      <span class="badge-blue">Live Data</span>
+    </div>
+    <table class="zone-table">
+      <thead><tr><th>Zone</th><th>Machines</th><th>OEE</th><th>Availability</th><th>Performance</th><th>Quality</th><th>Alerts</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td><strong style="color:var(--t1)">Zone A — Assembly</strong></td><td>9</td><td style="color:var(--blue-lt);font-family:var(--mono);font-weight:600">91.2%</td><td style="font-family:var(--mono)">96.4%</td><td style="font-family:var(--mono)">93.8%</td><td style="font-family:var(--mono)">100%</td><td><span class="badge-green">0</span></td><td><span class="badge-green"><span class="dot"></span>Nominal</span></td></tr>
+        <tr><td><strong style="color:var(--t1)">Zone B — Processing</strong></td><td>10</td><td style="color:var(--amber-lt);font-family:var(--mono);font-weight:600">79.4%</td><td style="font-family:var(--mono)">84.1%</td><td style="font-family:var(--mono)">89.2%</td><td style="font-family:var(--mono)">99.7%</td><td><span class="badge-red">2</span></td><td><span class="badge-amber"><span class="dot dot-pulse"></span>Attention</span></td></tr>
+        <tr><td><strong style="color:var(--t1)">Zone C — Finishing</strong></td><td>7</td><td style="color:var(--blue-lt);font-family:var(--mono);font-weight:600">88.6%</td><td style="font-family:var(--mono)">93.2%</td><td style="font-family:var(--mono)">91.5%</td><td style="font-family:var(--mono)">99.8%</td><td><span class="badge-amber">1</span></td><td><span class="badge-green"><span class="dot"></span>Nominal</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+<script>
+  setInterval(()=>document.getElementById('navClock').textContent=new Date().toTimeString().slice(0,8)+' UTC',1000);
+  const oeeData=[{z:'Zone A',v:91.2,c:'var(--blue-lt)'},{z:'Zone B',v:79.4,c:'var(--amber-lt)'},{z:'Zone C',v:88.6,c:'var(--teal-lt)'}];
+  const bc=document.getElementById('oeeBar');
+  oeeData.forEach(d=>{
+    const col=document.createElement('div'); col.className='bar-col';
+    col.innerHTML=`<div class="bar-val">${d.v}%</div><div class="bar-block" style="height:0%;background:${d.c};"></div><div class="bar-lbl">${d.z.split('—')[0]}</div>`;
+    bc.appendChild(col); setTimeout(()=>col.children[1].style.height=d.v+'%',200);
+  });
+  const vals=[71,74,78,75,80,82,79,83,85,84,87,86,89,87];
+  const mx=Math.max(...vals);
+  const sp=document.getElementById('utilSpark');
+  vals.forEach(v=>{
+    const b=document.createElement('div'); b.className='spark'; b.style.height='0px'; b.title=v+'%'; sp.appendChild(b);
+    setTimeout(()=>b.style.height=(v/mx*100)+'%',300);
+  });
+</script>
+</body>
+</html>

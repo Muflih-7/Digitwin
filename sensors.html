@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DigitTwin — Sensor Network</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .sensor-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px; }
+    .sensor-card { background:var(--bg2); border:1px solid var(--border); border-radius:6px; padding:14px; transition:border-color 0.15s; cursor:default; }
+    .sensor-card:hover { border-color:var(--border2); }
+    .sensor-card.warn { border-left:3px solid var(--amber-lt); }
+    .sensor-card.crit { border-left:3px solid var(--red-lt); }
+    .sc-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+    .sc-id { font-family:var(--mono); font-size:0.65rem; color:var(--t3); }
+    .sc-zone { font-size:0.6rem; font-weight:500; color:var(--t4); background:var(--bg3); padding:2px 6px; border-radius:2px; }
+    .sc-val { font-family:var(--mono); font-size:1.4rem; font-weight:700; color:var(--t1); line-height:1; margin-bottom:2px; }
+    .sc-type { font-size:0.62rem; color:var(--t3); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:8px; }
+    .sc-bar { height:3px; background:var(--border); border-radius:2px; overflow:hidden; }
+    .sc-fill { height:100%; border-radius:2px; }
+    .sf-ok   { background:var(--green-lt); }
+    .sf-warn { background:var(--amber-lt); }
+    .sf-crit { background:var(--red-lt); }
+    .summary-row { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px; }
+    .sum-card { background:var(--bg2); border:1px solid var(--border); border-radius:6px; padding:14px 16px; }
+    .sum-val { font-size:1.6rem; font-weight:700; letter-spacing:-0.02em; margin-bottom:3px; }
+    .sum-lbl { font-size:0.65rem; color:var(--t3); font-weight:500; text-transform:uppercase; letter-spacing:0.04em; }
+  </style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="nav-logo">Digit<span>Twin</span></div>
+  <div class="nav-links">
+    <a class="nav-link" href="dashboard.html">Overview</a>
+    <a class="nav-link" href="twin.html">3D Twin</a>
+    <a class="nav-link" href="analytics.html">Analytics</a>
+    <a class="nav-link" href="maintenance.html">Maintenance</a>
+  </div>
+  <div class="nav-right">
+    <div class="nav-time" id="navClock">--:--:--</div>
+    <div class="nav-user"><div class="user-av">OP</div><div class="user-nm">Operator</div></div>
+  </div>
+</nav>
+<nav class="sidenav">
+  <div class="side-section">
+    <div class="side-label">Monitor</div>
+    <a class="side-link" href="dashboard.html">Overview</a>
+    <a class="side-link" href="twin.html">3D Digital Twin</a>
+    <a class="side-link active" href="sensors.html">Sensor Network <span class="side-chip sc-blue">48</span></a>
+    <a class="side-link" href="alerts.html">Live Alerts <span class="side-chip sc-red">3</span></a>
+  </div>
+  <div class="side-section">
+    <div class="side-label">Analytics</div>
+    <a class="side-link" href="analytics.html">Performance</a>
+    <a class="side-link" href="history.html">Historical Data</a>
+    <a class="side-link" href="faults.html">Fault Analysis</a>
+  </div>
+  <div class="side-section">
+    <div class="side-label">Platforms</div>
+    <a class="side-ext" href="https://factoryonline-production.up.railway.app/" target="_blank">Smart Factory <span class="side-ext-icon">↗</span></a>
+    <a class="side-ext" href="https://predictivemaintenance-91fu.onrender.com/" target="_blank">Pred. Maintenance <span class="side-ext-icon">↗</span></a>
+    <a class="side-ext" href="https://mechsim.onrender.com/" target="_blank">MECHSIM <span class="side-ext-icon">↗</span></a>
+  </div>
+  <div class="side-section">
+    <div class="side-label">System</div>
+    <a class="side-link" href="settings.html">Configuration</a>
+    <a class="side-link" href="reports.html">Reports</a>
+  </div>
+  <div class="side-bottom"><a class="side-logout" href="index.html">← Sign Out</a></div>
+</nav>
+<main class="main">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;" class="fade-in">
+    <div>
+      <div class="page-title">Sensor Network</div>
+      <div class="page-sub">DigitTwin / Monitor / Sensor Network — 48 nodes across 3 zones</div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn" onclick="refreshSensors()">↻ &nbsp;Refresh</button>
+      <a href="https://factoryonline-production.up.railway.app/" target="_blank" class="btn btn-primary">Open Smart Factory ↗</a>
+    </div>
+  </div>
+
+  <div class="summary-row fade-in d1">
+    <div class="sum-card"><div class="sum-val" style="color:var(--green-lt)">44</div><div class="sum-lbl">Sensors Online</div></div>
+    <div class="sum-card"><div class="sum-val" style="color:var(--amber-lt)">3</div><div class="sum-lbl">Degraded Signal</div></div>
+    <div class="sum-card"><div class="sum-val" style="color:var(--red-lt)">1</div><div class="sum-lbl">Offline</div></div>
+    <div class="sum-card"><div class="sum-val" style="color:var(--blue-lt)">240ms</div><div class="sum-lbl">Avg. Latency</div></div>
+  </div>
+
+  <div style="margin-bottom:10px;font-size:0.72rem;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:0.04em;" class="fade-in d2">Zone A — Assembly</div>
+  <div class="sensor-grid fade-in d2" id="zoneA"></div>
+
+  <div style="margin-bottom:10px;font-size:0.72rem;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:0.04em;" class="fade-in d3">Zone B — Processing</div>
+  <div class="sensor-grid fade-in d3" id="zoneB"></div>
+
+  <div style="margin-bottom:10px;font-size:0.72rem;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:0.04em;" class="fade-in d4">Zone C — Finishing</div>
+  <div class="sensor-grid fade-in d4" id="zoneC"></div>
+</main>
+<script>
+  setInterval(()=>document.getElementById('navClock').textContent=new Date().toTimeString().slice(0,8)+' UTC',1000);
+
+  const sensors = {
+    A:[
+      {id:'A1',type:'Temperature',val:'64°C',pct:64,st:'ok'},{id:'A2',type:'Vibration',val:'2.1 mm/s',pct:21,st:'ok'},
+      {id:'A3',type:'Current',val:'14.2 A',pct:58,st:'ok'},{id:'A4',type:'Temperature',val:'58°C',pct:58,st:'ok'},
+      {id:'A5',type:'Pressure',val:'3.2 bar',pct:42,st:'ok'},{id:'A6',type:'Vibration',val:'1.8 mm/s',pct:18,st:'ok'},
+      {id:'A7',type:'Temperature',val:'45°C',pct:45,st:'ok'},{id:'A8',type:'RPM',val:'2,840',pct:71,st:'ok'},
+      {id:'A9',type:'Load',val:'73%',pct:73,st:'ok'},{id:'A10',type:'Humidity',val:'41%',pct:41,st:'ok'},
+      {id:'A11',type:'Voltage',val:'398 V',pct:80,st:'ok'},{id:'A12',type:'CO2',val:'412 ppm',pct:41,st:'ok'},
+      {id:'A13',type:'Noise',val:'68 dB',pct:68,st:'ok'},{id:'A14',type:'Temperature',val:'52°C',pct:52,st:'ok'},
+      {id:'A15',type:'Signal',val:'67%',pct:67,st:'warn'},{id:'A16',type:'Flow',val:'12.4 L/m',pct:62,st:'ok'},
+    ],
+    B:[
+      {id:'B1',type:'Temperature',val:'91°C',pct:91,st:'crit'},{id:'B2',type:'Vibration',val:'12.4 mm/s',pct:95,st:'crit'},
+      {id:'B3',type:'Temperature',val:'78°C',pct:78,st:'warn'},{id:'B4',type:'Signal',val:'67%',pct:67,st:'warn'},
+      {id:'B5',type:'Pressure',val:'5.8 bar',pct:82,st:'warn'},{id:'B6',type:'Current',val:'22.1 A',pct:88,st:'ok'},
+      {id:'B7',type:'Vibration',val:'5.2 mm/s',pct:52,st:'ok'},{id:'B8',type:'Temperature',val:'55°C',pct:55,st:'ok'},
+      {id:'B9',type:'RPM',val:'3,100',pct:78,st:'ok'},{id:'B10',type:'Load',val:'98%',pct:98,st:'crit'},
+      {id:'B11',type:'Oil Level',val:'38%',pct:38,st:'warn'},{id:'B12',type:'Flow',val:'8.2 L/m',pct:41,st:'ok'},
+      {id:'B13',type:'Voltage',val:'401 V',pct:80,st:'ok'},{id:'B14',type:'Noise',val:'74 dB',pct:74,st:'ok'},
+      {id:'B15',type:'Temperature',val:'48°C',pct:48,st:'ok'},{id:'B16',type:'Current',val:'16.8 A',pct:67,st:'ok'},
+    ],
+    C:[
+      {id:'C1',type:'Temperature',val:'72°C',pct:72,st:'warn'},{id:'C2',type:'Pressure',val:'4.8 bar',pct:68,st:'ok'},
+      {id:'C3',type:'Vibration',val:'4.8 mm/s',pct:48,st:'ok'},{id:'C4',type:'Temperature',val:'49°C',pct:49,st:'ok'},
+      {id:'C5',type:'RPM',val:'1,800',pct:60,st:'ok'},{id:'C6',type:'Temperature',val:'38°C',pct:38,st:'ok'},
+      {id:'C7',type:'Flow',val:'6.4 L/m',pct:32,st:'ok'},{id:'C8',type:'Humidity',val:'38%',pct:38,st:'ok'},
+      {id:'C9',type:'Signal',val:'OFFLINE',pct:0,st:'crit'},{id:'C10',type:'Noise',val:'61 dB',pct:61,st:'ok'},
+      {id:'C11',type:'Current',val:'11.4 A',pct:46,st:'ok'},{id:'C12',type:'Load',val:'61%',pct:61,st:'ok'},
+      {id:'C13',type:'Voltage',val:'395 V',pct:79,st:'ok'},{id:'C14',type:'Temperature',val:'32°C',pct:32,st:'ok'},
+      {id:'C15',type:'CO2',val:'398 ppm',pct:40,st:'ok'},{id:'C16',type:'Vibration',val:'2.6 mm/s',pct:26,st:'ok'},
+    ]
+  };
+
+  function renderZone(zone, containerId) {
+    const el = document.getElementById(containerId);
+    el.innerHTML = sensors[zone].map(s => `
+      <div class="sensor-card ${s.st==='ok'?'':s.st}">
+        <div class="sc-top">
+          <span class="sc-id">NODE-${s.id}</span>
+          <span class="sc-zone">Zone ${zone}</span>
+        </div>
+        <div class="sc-val">${s.val}</div>
+        <div class="sc-type">${s.type}</div>
+        <div class="sc-bar"><div class="sc-fill sf-${s.st}" style="width:${s.pct}%"></div></div>
+      </div>
+    `).join('');
+  }
+
+  renderZone('A','zoneA');
+  renderZone('B','zoneB');
+  renderZone('C','zoneC');
+
+  function refreshSensors() {
+    document.querySelectorAll('.sc-val').forEach(el => {
+      // Slight flicker to show refresh
+      el.style.opacity = '0.4';
+      setTimeout(()=>el.style.opacity='1', 300);
+    });
+  }
+</script>
+</body>
+</html>

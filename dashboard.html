@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DigitTwin — Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { overflow-x:hidden; }
+    .kpi-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:18px; }
+    .kpi-card { background:var(--bg2); border:1px solid var(--border); border-radius:6px; padding:16px 18px; position:relative; overflow:hidden; transition:border-color 0.15s; }
+    .kpi-card:hover { border-color:var(--border2); }
+    .kpi-accent { position:absolute; bottom:0; left:0; right:0; height:2px; }
+    .ka-blue{background:var(--blue-lt);} .ka-green{background:var(--green-lt);} .ka-amber{background:var(--amber-lt);} .ka-red{background:var(--red-lt);}
+    .kpi-label { font-size:0.68rem; font-weight:500; color:var(--t3); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:10px; }
+    .kpi-value { font-size:2rem; font-weight:700; letter-spacing:-0.03em; line-height:1; margin-bottom:6px; }
+    .kv-blue{color:var(--blue-lt);} .kv-green{color:var(--green-lt);} .kv-amber{color:var(--amber-lt);} .kv-red{color:var(--red-lt);}
+    .kpi-meta { font-size:0.7rem; color:var(--t3); display:flex; align-items:center; gap:6px; }
+    .trend { display:inline-flex; align-items:center; gap:2px; font-size:0.68rem; font-weight:500; padding:2px 5px; border-radius:3px; }
+    .trend-up{background:var(--green-glow);color:var(--green-lt);} .trend-down{background:var(--red-glow);color:var(--red-lt);}
+    .main-grid { display:grid; grid-template-columns:1fr 320px; gap:16px; margin-bottom:16px; }
+    .twin-card { background:var(--bg2); border:1px solid var(--border); border-radius:6px; overflow:hidden; cursor:pointer; transition:border-color 0.2s; height:360px; position:relative; }
+    .twin-card:hover { border-color:var(--border2); }
+    #dashCanvas { width:100%; height:100%; display:block; }
+    .twin-overlay { position:absolute; inset:0; display:flex; flex-direction:column; pointer-events:none; }
+    .twin-top { padding:12px 16px; display:flex; align-items:center; justify-content:space-between; background:linear-gradient(180deg,rgba(19,22,30,0.95) 0%,transparent 100%); }
+    .twin-top-left { font-size:0.72rem; font-weight:600; color:var(--t2); }
+    .twin-bottom { margin-top:auto; padding:12px 16px; background:linear-gradient(0deg,rgba(19,22,30,0.95) 0%,transparent 100%); display:flex; align-items:center; justify-content:space-between; }
+    .twin-hint { font-size:0.65rem; color:var(--t3); }
+    .open-twin { pointer-events:all; display:inline-flex; align-items:center; gap:5px; padding:6px 12px; background:var(--blue); color:#fff; border-radius:4px; font-size:0.72rem; font-weight:600; text-decoration:none; transition:background 0.15s; }
+    .open-twin:hover { background:#1d4ed8; }
+    .alerts-card { background:var(--bg2); border:1px solid var(--border); border-radius:6px; display:flex; flex-direction:column; overflow:hidden; }
+    .alert-item { padding:11px 14px; border-bottom:1px solid var(--border); display:flex; gap:10px; align-items:flex-start; transition:background 0.1s; }
+    .alert-item:last-child { border-bottom:none; }
+    .alert-item:hover { background:rgba(255,255,255,0.018); }
+    .alert-ic { width:22px; height:22px; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:0.7rem; flex-shrink:0; margin-top:1px; }
+    .ai-red{background:var(--red-glow);color:var(--red-lt);border:1px solid rgba(239,68,68,0.2);}
+    .ai-amber{background:var(--amber-glow);color:var(--amber-lt);border:1px solid rgba(245,158,11,0.2);}
+    .ai-blue{background:var(--blue-glow);color:var(--blue-lt);border:1px solid rgba(59,130,246,0.2);}
+    .ai-green{background:var(--green-glow);color:var(--green-lt);border:1px solid rgba(16,185,129,0.2);}
+    .alert-msg { font-size:0.75rem; color:var(--t2); line-height:1.4; margin-bottom:2px; }
+    .alert-meta { font-size:0.62rem; color:var(--t3); }
+    .platform-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+    .pc { background:var(--bg2); border:1px solid var(--border); border-radius:6px; padding:18px; text-decoration:none; display:block; position:relative; overflow:hidden; transition:all 0.18s; }
+    .pc:hover { border-color:var(--border2); transform:translateY(-1px); box-shadow:0 4px 20px rgba(0,0,0,0.25); }
+    .pc-accent { position:absolute; top:0; left:0; right:0; height:2px; }
+    .pca-blue{background:var(--blue-lt);} .pca-teal{background:var(--teal-lt);} .pca-amber{background:var(--amber-lt);} .pca-purple{background:#a855f7;}
+    .pc-tag { font-size:0.62rem; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:8px; display:flex; align-items:center; gap:5px; }
+    .pct-blue{color:var(--blue-lt);} .pct-teal{color:var(--teal-lt);} .pct-amber{color:var(--amber-lt);} .pct-purple{color:#a855f7;}
+    .pc-name { font-size:0.95rem; font-weight:700; color:var(--t1); margin-bottom:5px; letter-spacing:-0.01em; }
+    .pc-desc { font-size:0.7rem; color:var(--t3); line-height:1.5; margin-bottom:12px; }
+    .pc-launch { font-size:0.7rem; font-weight:600; display:flex; align-items:center; gap:4px; transition:gap 0.15s; }
+    .pla-blue{color:var(--blue-lt);} .pla-teal{color:var(--teal-lt);} .pla-amber{color:var(--amber-lt);} .pla-purple{color:#a855f7;}
+    .pc:hover .pc-launch { gap:7px; }
+    .dash-footer { margin-top:14px; padding-top:12px; border-top:1px solid var(--border); display:flex; justify-content:space-between; }
+    .footer-t { font-size:0.65rem; color:var(--t4); }
+  </style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-logo">Digit<span>Twin</span></div>
+  <div class="nav-links">
+    <a class="nav-link active" href="dashboard.html">Overview</a>
+    <a class="nav-link" href="twin.html">3D Twin</a>
+    <a class="nav-link" href="analytics.html">Analytics</a>
+    <a class="nav-link" href="maintenance.html">Maintenance</a>
+  </div>
+  <div class="nav-right">
+    <div class="nav-time" id="navClock">--:--:--</div>
+    <button class="nav-icon-btn" title="Alerts">⚠<div class="nav-badge">3</div></button>
+    <div class="nav-user"><div class="user-av">OP</div><div class="user-nm">Operator</div></div>
+  </div>
+</nav>
+
+<nav class="sidenav">
+  <div class="side-section">
+    <div class="side-label">Monitor</div>
+    <a class="side-link active" href="dashboard.html">Overview</a>
+    <a class="side-link" href="twin.html">3D Digital Twin</a>
+    <a class="side-link" href="sensors.html">Sensor Network <span class="side-chip sc-blue">48</span></a>
+    <a class="side-link" href="alerts.html">Live Alerts <span class="side-chip sc-red">3</span></a>
+  </div>
+  <div class="side-section">
+    <div class="side-label">Analytics</div>
+    <a class="side-link" href="analytics.html">Performance</a>
+    <a class="side-link" href="history.html">Historical Data</a>
+    <a class="side-link" href="faults.html">Fault Analysis</a>
+  </div>
+  <div class="side-section">
+    <div class="side-label">Platforms</div>
+    <a class="side-ext" href="https://factoryonline-production.up.railway.app/" target="_blank">Smart Factory <span class="side-ext-icon">↗</span></a>
+    <a class="side-ext" href="https://predictivemaintenance-91fu.onrender.com/" target="_blank">Pred. Maintenance <span class="side-ext-icon">↗</span></a>
+    <a class="side-ext" href="https://mechsim.onrender.com/" target="_blank">MECHSIM <span class="side-ext-icon">↗</span></a>
+    <a class="side-ext" href="https://optimalprint.onrender.com/" target="_blank">OptimalPrint <span class="side-ext-icon">↗</span></a>
+  </div>
+  <div class="side-section">
+    <div class="side-label">System</div>
+    <a class="side-link" href="settings.html">Configuration</a>
+    <a class="side-link" href="reports.html">Reports</a>
+  </div>
+  <div class="side-bottom">
+    <a class="side-logout" href="index.html">← Sign Out</a>
+  </div>
+</nav>
+
+<main class="main">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;" class="fade-in">
+    <div>
+      <div class="page-title">System Overview</div>
+      <div class="page-sub">DigitTwin &nbsp;/&nbsp; Dashboard &nbsp;/&nbsp; Real-Time Monitoring</div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <span class="badge-green"><span class="dot dot-pulse"></span>All Systems Nominal</span>
+      <button class="btn" onclick="refreshDash()">↻ &nbsp;Refresh</button>
+    </div>
+  </div>
+
+  <div class="kpi-grid fade-in d1">
+    <div class="kpi-card">
+      <div class="kpi-label">Overall Equipment Effectiveness</div>
+      <div class="kpi-value kv-blue" id="kOee">87.3<span style="font-size:1.1rem;font-weight:400">%</span></div>
+      <div class="kpi-meta"><span class="trend trend-up">▲ 2.1%</span> vs last shift</div>
+      <div class="kpi-accent ka-blue"></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Active Machines</div>
+      <div class="kpi-value kv-green">24<span style="font-size:1.1rem;font-weight:400;color:var(--t3)">/26</span></div>
+      <div class="kpi-meta" style="color:var(--t3)">2 in scheduled maintenance</div>
+      <div class="kpi-accent ka-green"></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Avg. Remaining Useful Life</div>
+      <div class="kpi-value kv-amber">1,247<span style="font-size:1.1rem;font-weight:400"> hrs</span></div>
+      <div class="kpi-meta"><span class="trend trend-down">▼ 48h</span> updated by ML model</div>
+      <div class="kpi-accent ka-amber"></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Critical Alerts</div>
+      <div class="kpi-value kv-red">3</div>
+      <div class="kpi-meta" style="color:var(--t3)">1 requires immediate action</div>
+      <div class="kpi-accent ka-red"></div>
+    </div>
+  </div>
+
+  <div class="main-grid fade-in d2">
+    <div class="twin-card" onclick="window.location.href='twin.html'">
+      <canvas id="dashCanvas"></canvas>
+      <div class="twin-overlay">
+        <div class="twin-top">
+          <div class="twin-top-left">3D Digital Twin — Factory Floor A</div>
+          <span class="badge-green"><span class="dot dot-pulse"></span>Live</span>
+        </div>
+        <div class="twin-bottom">
+          <div class="twin-hint">Click to open interactive view &nbsp;·&nbsp; Drag to rotate &nbsp;·&nbsp; Scroll to zoom</div>
+          <a href="twin.html" class="open-twin" onclick="event.stopPropagation()">Open Twin ↗</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="alerts-card">
+      <div class="card-header">
+        <span class="card-title">Live Alerts</span>
+        <span class="badge-amber"><span class="dot dot-pulse"></span>3 Active</span>
+      </div>
+      <div class="alert-item">
+        <div class="alert-ic ai-red">!</div>
+        <div>
+          <div class="alert-msg">CNC Machine M-07 — Spindle vibration exceeds 12.4 mm/s</div>
+          <div class="alert-meta">CRITICAL &nbsp;·&nbsp; 4 min ago &nbsp;·&nbsp; Zone B</div>
+        </div>
+      </div>
+      <div class="alert-item">
+        <div class="alert-ic ai-amber">▲</div>
+        <div>
+          <div class="alert-msg">Conveyor Belt CB-03 — Bearing temperature: 78°C</div>
+          <div class="alert-meta">WARNING &nbsp;·&nbsp; 18 min ago &nbsp;·&nbsp; Zone A</div>
+        </div>
+      </div>
+      <div class="alert-item">
+        <div class="alert-ic ai-amber">▲</div>
+        <div>
+          <div class="alert-msg">Hydraulic Press HP-02 — Oil pressure fluctuation ±8%</div>
+          <div class="alert-meta">WARNING &nbsp;·&nbsp; 31 min ago &nbsp;·&nbsp; Zone C</div>
+        </div>
+      </div>
+      <div class="alert-item">
+        <div class="alert-ic ai-green">✓</div>
+        <div>
+          <div class="alert-msg">Robot Arm RA-12 — Maintenance completed</div>
+          <div class="alert-meta">RESOLVED &nbsp;·&nbsp; 2 hr ago &nbsp;·&nbsp; Zone A</div>
+        </div>
+      </div>
+      <div class="alert-item">
+        <div class="alert-ic ai-blue">i</div>
+        <div>
+          <div class="alert-msg">Sensor Node B4 — Signal quality degraded to 67%</div>
+          <div class="alert-meta">INFO &nbsp;·&nbsp; 3 hr ago &nbsp;·&nbsp; Zone B</div>
+        </div>
+      </div>
+      <div style="padding:10px 14px;">
+        <a href="alerts.html" class="btn" style="width:100%;justify-content:center;font-size:0.72rem;">View All Alerts</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="platform-grid fade-in d3">
+    <a class="pc" href="https://factoryonline-production.up.railway.app/" target="_blank">
+      <div class="pc-accent pca-blue"></div>
+      <div class="pc-tag pct-blue"><span class="dot dot-pulse" style="background:var(--blue-lt)"></span>Live Platform</div>
+      <div class="pc-name">Smart Factory</div>
+      <div class="pc-desc">Real-time IoT monitoring across 48 sensor nodes and 26 machines.</div>
+      <div class="pc-launch pla-blue">Open Platform <span>↗</span></div>
+    </a>
+    <a class="pc" href="https://predictivemaintenance-91fu.onrender.com/" target="_blank">
+      <div class="pc-accent pca-teal"></div>
+      <div class="pc-tag pct-teal"><span class="dot dot-pulse" style="background:var(--teal-lt)"></span>ML Platform</div>
+      <div class="pc-name">Predictive Maintenance</div>
+      <div class="pc-desc">ML failure prediction and RUL estimation using Isolation Forest and LSTM.</div>
+      <div class="pc-launch pla-teal">Open Platform <span>↗</span></div>
+    </a>
+    <a class="pc" href="https://mechsim.onrender.com/" target="_blank">
+      <div class="pc-accent pca-amber"></div>
+      <div class="pc-tag pct-amber"><span class="dot dot-pulse" style="background:var(--amber-lt)"></span>Simulation</div>
+      <div class="pc-name">MECHSIM</div>
+      <div class="pc-desc">Structural FEA, ML material selection, gear design and CFD simulation.</div>
+      <div class="pc-launch pla-amber">Open Platform <span>↗</span></div>
+    </a>
+    <a class="pc" href="https://optimalprint.onrender.com/" target="_blank">
+      <div class="pc-accent pca-purple"></div>
+      <div class="pc-tag pct-purple"><span class="dot dot-pulse" style="background:#a855f7"></span>Print Platform</div>
+      <div class="pc-name">OptimalPrint</div>
+      <div class="pc-desc">Optimised print job scheduling, material usage and production analytics.</div>
+      <div class="pc-launch pla-purple">Open Platform <span>↗</span></div>
+    </a>
+  </div>
+
+  <div class="dash-footer fade-in d4">
+    <div class="footer-t">DigitTwin v2.5.1 &nbsp;·&nbsp; Last sync: <span id="lastSync">--</span> &nbsp;·&nbsp; Latency: 240ms</div>
+    <div class="footer-t">© 2025 DigitTwin Platform</div>
+  </div>
+</main>
+
+<script>
+  function tick() {
+    const t=new Date().toTimeString().slice(0,8);
+    document.getElementById('navClock').textContent=t+' UTC';
+    document.getElementById('lastSync').textContent=t;
+  }
+  tick(); setInterval(tick,1000);
+
+  function refreshDash() {
+    document.getElementById('kOee').innerHTML=(87+Math.random()*1.5).toFixed(1)+'<span style="font-size:1.1rem;font-weight:400">%</span>';
+  }
+
+  (function(){
+    const canvas=document.getElementById('dashCanvas');
+    const gl=canvas.getContext('webgl'); if(!gl)return;
+    function sz(){canvas.width=canvas.offsetWidth;canvas.height=canvas.offsetHeight;}
+    sz(); window.addEventListener('resize',sz);
+    const VS=`attribute vec3 p;attribute vec3 c;uniform mat4 m;varying vec3 vc;void main(){gl_Position=m*vec4(p,1.);vc=c;}`;
+    const FS=`precision mediump float;varying vec3 vc;void main(){gl_FragColor=vec4(vc,1.);}`;
+    function sh(src,t){const s=gl.createShader(t);gl.shaderSource(s,src);gl.compileShader(s);return s;}
+    const pr=gl.createProgram();
+    gl.attachShader(pr,sh(VS,gl.VERTEX_SHADER));gl.attachShader(pr,sh(FS,gl.FRAGMENT_SHADER));
+    gl.linkProgram(pr);gl.useProgram(pr);
+    const pos=[],col=[];
+    function box(cx,cy,cz,w,h,d,r,g,b){
+      const x0=cx-w/2,x1=cx+w/2,y0=cy,y1=cy+h,z0=cz-d/2,z1=cz+d/2;
+      const F=[x0,y0,z1,x1,y0,z1,x1,y1,z1,x0,y0,z1,x1,y1,z1,x0,y1,z1,
+               x1,y0,z0,x0,y0,z0,x0,y1,z0,x1,y0,z0,x0,y1,z0,x1,y1,z0,
+               x0,y0,z0,x0,y0,z1,x0,y1,z1,x0,y0,z0,x0,y1,z1,x0,y1,z0,
+               x1,y0,z1,x1,y0,z0,x1,y1,z0,x1,y0,z1,x1,y1,z0,x1,y1,z1,
+               x0,y1,z1,x1,y1,z1,x1,y1,z0,x0,y1,z1,x1,y1,z0,x0,y1,z0,
+               x0,y0,z0,x1,y0,z0,x1,y0,z1,x0,y0,z0,x1,y0,z1,x0,y0,z1];
+      const bri=[0.75,0.6,0.55,0.55,1.0,0.25];
+      for(let f=0;f<6;f++){const bv=bri[f];for(let v=0;v<6;v++){const i=(f*6+v)*3;pos.push(F[i],F[i+1],F[i+2]);col.push(r*bv,g*bv,b*bv);}}
+    }
+    for(let x=-5;x<5;x+=0.7)for(let z=-5;z<5;z+=0.7){
+      pos.push(x,0,z,x+.7,0,z,x,0,z+.7,x+.7,0,z,x+.7,0,z+.7,x,0,z+.7);
+      const cv=(Math.round(x/.7)+Math.round(z/.7))%2===0?.05:.035;
+      for(let i=0;i<6;i++)col.push(cv,cv*1.1,cv*1.8);
+    }
+    box(-3,0,-3,.7,1,.7,.14,.47,.96);box(-1.5,0,-3,.65,.85,.65,.14,.47,.96);
+    box(0,0,-3,.6,1.3,.6,.06,.73,.51);box(-3,0,0,.7,.95,.7,.86,.47,.05);
+    box(-1.5,0,0,.7,.95,.7,.86,.27,.27);box(.5,0,-.1,2.5,.18,.75,.28,.32,.5);
+    box(2.2,0,0,.65,.85,.65,.86,.47,.05);box(3.5,0,0,.6,1,.6,.14,.47,.96);
+    box(-3,0,3,.8,.7,.8,.14,.47,.96);box(-.5,0,3,.65,.9,.65,.06,.73,.51);
+    box(1.5,0,3,.7,.95,.7,.14,.47,.96);box(3.5,0,3,.65,.8,.65,.06,.73,.51);
+    box(-4.8,0,-4.8,.2,2.8,.2,.06,.08,.15);box(4.8,0,-4.8,.2,2.8,.2,.06,.08,.15);
+    box(-4.8,0,4.8,.2,2.8,.2,.06,.08,.15);box(4.8,0,4.8,.2,2.8,.2,.06,.08,.15);
+    const pb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,pb);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(pos),gl.STATIC_DRAW);
+    const cb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,cb);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(col),gl.STATIC_DRAW);
+    const ap=gl.getAttribLocation(pr,'p'),ac=gl.getAttribLocation(pr,'c'),um=gl.getUniformLocation(pr,'m');
+    const nv=pos.length/3;
+    function mul(a,b){const o=new Float32Array(16);for(let i=0;i<4;i++)for(let j=0;j<4;j++){o[j*4+i]=0;for(let k=0;k<4;k++)o[j*4+i]+=a[k*4+i]*b[j*4+k];}return o;}
+    function proj(f,a,n,fr){const t=1/Math.tan(f/2),o=new Float32Array(16);o[0]=t/a;o[5]=t;o[10]=(fr+n)/(n-fr);o[11]=-1;o[14]=2*fr*n/(n-fr);return o;}
+    function ry(a){const c=Math.cos(a),s=Math.sin(a),o=new Float32Array(16);o[0]=c;o[2]=s;o[5]=1;o[8]=-s;o[10]=c;o[15]=1;return o;}
+    function rx(a){const c=Math.cos(a),s=Math.sin(a),o=new Float32Array(16);o[0]=1;o[5]=c;o[6]=-s;o[9]=s;o[10]=c;o[15]=1;return o;}
+    function tr(x,y,z){const o=new Float32Array(16);o[0]=1;o[5]=1;o[10]=1;o[15]=1;o[12]=x;o[13]=y;o[14]=z;return o;}
+    let t=0;
+    function draw(){
+      t+=0.004; sz();
+      gl.viewport(0,0,canvas.width,canvas.height);
+      gl.clearColor(.02,.04,.09,1);
+      gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+      gl.enable(gl.DEPTH_TEST);
+      /* KEY FIX: rx(.58) = higher camera angle so you see FROM ABOVE not from below */
+      const mvp=mul(proj(.75,canvas.width/canvas.height,.1,60),mul(tr(0,-0.5,-11),mul(rx(.58),ry(t))));
+      gl.uniformMatrix4fv(um,false,mvp);
+      gl.bindBuffer(gl.ARRAY_BUFFER,pb);gl.enableVertexAttribArray(ap);gl.vertexAttribPointer(ap,3,gl.FLOAT,false,0,0);
+      gl.bindBuffer(gl.ARRAY_BUFFER,cb);gl.enableVertexAttribArray(ac);gl.vertexAttribPointer(ac,3,gl.FLOAT,false,0,0);
+      gl.drawArrays(gl.TRIANGLES,0,nv);
+      requestAnimationFrame(draw);
+    }
+    draw();
+  })();
+</script>
+</body>
+</html>

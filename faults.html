@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DigitTwin — Fault Analysis</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .fault-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+    .fault-card { background:var(--bg2); border:1px solid var(--border); border-radius:6px; padding:18px; }
+    .fc-title { font-size:0.78rem; font-weight:600; color:var(--t2); text-transform:uppercase; letter-spacing:0.03em; margin-bottom:14px; }
+    .fault-row { display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid var(--border); }
+    .fault-row:last-child { border-bottom:none; }
+    .fr-name { font-size:0.75rem; color:var(--t2); }
+    .fr-bar-wrap { flex:1; margin:0 12px; }
+    .fr-count { font-family:var(--mono); font-size:0.72rem; font-weight:600; color:var(--t2); min-width:24px; text-align:right; }
+    .matrix-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:4px; }
+    .matrix-cell { aspect-ratio:1; border-radius:3px; display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:0.6rem; font-weight:600; color:#fff; }
+    .mc-0  { background:rgba(255,255,255,0.04); color:var(--t4); }
+    .mc-1  { background:rgba(37,99,235,0.25); color:var(--blue-lt); }
+    .mc-2  { background:rgba(37,99,235,0.5);  color:#93c5fd; }
+    .mc-3  { background:rgba(245,158,11,0.4); color:var(--amber-lt); }
+    .mc-4  { background:rgba(239,68,68,0.5);  color:#fca5a5; }
+    .matrix-labels { display:grid; grid-template-columns:repeat(5,1fr); gap:4px; margin-top:6px; }
+    .ml-lbl { font-size:0.55rem; color:var(--t4); text-align:center; font-family:var(--mono); }
+    .rca-item { padding:12px 0; border-bottom:1px solid var(--border); }
+    .rca-item:last-child { border-bottom:none; }
+    .rca-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; }
+    .rca-fault { font-size:0.75rem; font-weight:600; color:var(--t1); }
+    .rca-freq { font-family:var(--mono); font-size:0.65rem; color:var(--t3); }
+    .rca-cause { font-size:0.7rem; color:var(--t3); margin-bottom:4px; }
+    .rca-action { font-size:0.68rem; color:var(--blue-lt); }
+  </style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="nav-logo">Digit<span>Twin</span></div>
+  <div class="nav-links">
+    <a class="nav-link" href="dashboard.html">Overview</a>
+    <a class="nav-link" href="twin.html">3D Twin</a>
+    <a class="nav-link active" href="analytics.html">Analytics</a>
+    <a class="nav-link" href="maintenance.html">Maintenance</a>
+  </div>
+  <div class="nav-right">
+    <div class="nav-time" id="navClock">--:--:--</div>
+    <div class="nav-user"><div class="user-av">OP</div><div class="user-nm">Operator</div></div>
+  </div>
+</nav>
+<nav class="sidenav">
+  <div class="side-section">
+    <div class="side-label">Monitor</div>
+    <a class="side-link" href="dashboard.html">Overview</a>
+    <a class="side-link" href="twin.html">3D Digital Twin</a>
+    <a class="side-link" href="sensors.html">Sensor Network <span class="side-chip sc-blue">48</span></a>
+    <a class="side-link" href="alerts.html">Live Alerts <span class="side-chip sc-red">3</span></a>
+  </div>
+  <div class="side-section">
+    <div class="side-label">Analytics</div>
+    <a class="side-link" href="analytics.html">Performance</a>
+    <a class="side-link" href="history.html">Historical Data</a>
+    <a class="side-link active" href="faults.html">Fault Analysis</a>
+  </div>
+  <div class="side-section">
+    <div class="side-label">Platforms</div>
+    <a class="side-ext" href="https://factoryonline-production.up.railway.app/" target="_blank">Smart Factory <span class="side-ext-icon">↗</span></a>
+    <a class="side-ext" href="https://predictivemaintenance-91fu.onrender.com/" target="_blank">Pred. Maintenance <span class="side-ext-icon">↗</span></a>
+    <a class="side-ext" href="https://mechsim.onrender.com/" target="_blank">MECHSIM <span class="side-ext-icon">↗</span></a>
+  </div>
+  <div class="side-section">
+    <div class="side-label">System</div>
+    <a class="side-link" href="settings.html">Configuration</a>
+    <a class="side-link" href="reports.html">Reports</a>
+  </div>
+  <div class="side-bottom"><a class="side-logout" href="index.html">← Sign Out</a></div>
+</nav>
+<main class="main">
+  <div style="margin-bottom:20px;" class="fade-in">
+    <div class="page-title">Fault Analysis</div>
+    <div class="page-sub">DigitTwin / Analytics / Fault Analysis — Root cause and pattern detection</div>
+  </div>
+
+  <div class="fault-grid fade-in d1">
+    <div class="fault-card">
+      <div class="fc-title">Top Fault Types — Last 90 Days</div>
+      <div id="faultBars"></div>
+    </div>
+    <div class="fault-card">
+      <div class="fc-title">Fault Frequency Matrix</div>
+      <div style="font-size:0.65rem;color:var(--t3);margin-bottom:12px;">Machine × Fault type occurrence count</div>
+      <div class="matrix-grid" id="matrix"></div>
+      <div class="matrix-labels">
+        <span class="ml-lbl">Vib.</span><span class="ml-lbl">Temp.</span><span class="ml-lbl">Press.</span><span class="ml-lbl">Elec.</span><span class="ml-lbl">Mech.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="fault-card fade-in d2" style="margin-bottom:16px;">
+    <div class="fc-title">Root Cause Analysis</div>
+    <div id="rcaList"></div>
+  </div>
+
+  <div class="fault-grid fade-in d3">
+    <div class="fault-card">
+      <div class="fc-title">Fault Distribution by Zone</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:8px;">
+        <div style="text-align:center;">
+          <div style="font-size:1.8rem;font-weight:700;color:var(--green-lt)">14</div>
+          <div style="font-size:0.65rem;color:var(--t3);margin-top:3px;text-transform:uppercase;letter-spacing:0.05em">Zone A</div>
+          <div class="progress" style="margin-top:8px"><div class="progress-bar pb-green" style="width:38%"></div></div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:1.8rem;font-weight:700;color:var(--red-lt)">22</div>
+          <div style="font-size:0.65rem;color:var(--t3);margin-top:3px;text-transform:uppercase;letter-spacing:0.05em">Zone B</div>
+          <div class="progress" style="margin-top:8px"><div class="progress-bar pb-red" style="width:60%"></div></div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:1.8rem;font-weight:700;color:var(--amber-lt)">11</div>
+          <div style="font-size:0.65rem;color:var(--t3);margin-top:3px;text-transform:uppercase;letter-spacing:0.05em">Zone C</div>
+          <div class="progress" style="margin-top:8px"><div class="progress-bar pb-amber" style="width:30%"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="fault-card">
+      <div class="fc-title">ML Prediction Accuracy</div>
+      <div style="margin-top:8px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:5px;"><span style="font-size:0.72rem;color:var(--t2)">Vibration faults</span><span style="font-family:var(--mono);font-size:0.7rem;color:var(--green-lt)">97.2%</span></div>
+        <div class="progress" style="margin-bottom:10px"><div class="progress-bar pb-green" style="width:97%"></div></div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:5px;"><span style="font-size:0.72rem;color:var(--t2)">Thermal faults</span><span style="font-family:var(--mono);font-size:0.7rem;color:var(--green-lt)">94.8%</span></div>
+        <div class="progress" style="margin-bottom:10px"><div class="progress-bar pb-green" style="width:95%"></div></div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:5px;"><span style="font-size:0.72rem;color:var(--t2)">Pressure faults</span><span style="font-family:var(--mono);font-size:0.7rem;color:var(--blue-lt)">91.3%</span></div>
+        <div class="progress" style="margin-bottom:10px"><div class="progress-bar pb-blue" style="width:91%"></div></div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:5px;"><span style="font-size:0.72rem;color:var(--t2)">Electrical faults</span><span style="font-family:var(--mono);font-size:0.7rem;color:var(--amber-lt)">88.6%</span></div>
+        <div class="progress"><div class="progress-bar pb-amber" style="width:89%"></div></div>
+      </div>
+    </div>
+  </div>
+</main>
+<script>
+  setInterval(()=>document.getElementById('navClock').textContent=new Date().toTimeString().slice(0,8)+' UTC',1000);
+
+  const faults = [
+    {name:'Bearing Wear / Vibration', count:18, color:'var(--red-lt)', pct:100},
+    {name:'Thermal Overload', count:14, color:'var(--amber-lt)', pct:78},
+    {name:'Hydraulic Pressure', count:9, color:'var(--blue-lt)', pct:50},
+    {name:'Electrical Fault', count:7, color:'var(--teal-lt)', pct:39},
+    {name:'Mechanical Wear', count:5, color:'var(--green-lt)', pct:28},
+    {name:'Sensor Degradation', count:4, color:'var(--t3)', pct:22},
+  ];
+
+  document.getElementById('faultBars').innerHTML = faults.map(f=>`
+    <div class="fault-row">
+      <div class="fr-name">${f.name}</div>
+      <div class="fr-bar-wrap">
+        <div class="progress"><div class="progress-bar" style="width:${f.pct}%;background:${f.color}"></div></div>
+      </div>
+      <div class="fr-count" style="color:${f.color}">${f.count}</div>
+    </div>
+  `).join('');
+
+  const matrixData = [
+    [4,2,1,0,2],[3,1,0,1,1],[1,3,2,0,1],[0,1,1,2,0],[2,0,0,1,3],
+  ];
+  document.getElementById('matrix').innerHTML = matrixData.flat().map(v=>`
+    <div class="matrix-cell mc-${Math.min(v,4)}">${v>0?v:''}</div>
+  `).join('');
+
+  const rcaData = [
+    { fault:'CNC M-07 — Spindle Bearing Failure', freq:'2× in 90 days', cause:'Root cause: Inadequate lubrication cycle combined with sustained high-RPM operation above rated spec. Contributing factor: coolant contamination detected in bearing housing.', action:'→ Action: Replace bearing, flush coolant system, reduce duty cycle to 85% for 2 weeks post-repair.' },
+    { fault:'Conveyor CB-03 — Thermal Runaway', freq:'1× in 90 days', cause:'Root cause: Bearing misalignment causing increased friction load. Thermal sensor B3 showed 3-week progressive increase before threshold breach.', action:'→ Action: Realign conveyor belt tensioners, replace idler bearing, recalibrate thermal threshold to 75°C.' },
+    { fault:'Hydraulic HP-02 — Pressure Fluctuation', freq:'3× in 90 days', cause:'Root cause: Oil seal degradation causing micro-leaks. Pressure irregularity consistent with worn piston seal profile.', action:'→ Action: Replace piston seals, conduct full hydraulic system flush, increase inspection frequency to weekly.' },
+  ];
+
+  document.getElementById('rcaList').innerHTML = rcaData.map(r=>`
+    <div class="rca-item">
+      <div class="rca-top">
+        <span class="rca-fault">${r.fault}</span>
+        <span class="rca-freq">${r.freq}</span>
+      </div>
+      <div class="rca-cause">${r.cause}</div>
+      <div class="rca-action">${r.action}</div>
+    </div>
+  `).join('');
+</script>
+</body>
+</html>

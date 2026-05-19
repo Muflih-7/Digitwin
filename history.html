@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DigitTwin — Historical Data</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .hist-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+    .chart-card { background:var(--bg2); border:1px solid var(--border); border-radius:6px; padding:18px; }
+    .cc-title { font-size:0.78rem; font-weight:600; color:var(--t2); text-transform:uppercase; letter-spacing:0.03em; margin-bottom:4px; }
+    .cc-sub { font-size:0.68rem; color:var(--t3); margin-bottom:16px; }
+    .sparkline { display:flex; align-items:flex-end; gap:3px; height:80px; }
+    .spark { flex:1; border-radius:1px 1px 0 0; min-height:2px; transition:opacity 0.2s; cursor:pointer; }
+    .spark:hover { opacity:1 !important; }
+    .x-labels { display:flex; justify-content:space-between; margin-top:6px; }
+    .x-lbl { font-size:0.58rem; color:var(--t4); font-family:var(--mono); }
+    .data-table { width:100%; border-collapse:collapse; }
+    .data-table th { font-size:0.65rem; font-weight:600; color:var(--t3); text-transform:uppercase; letter-spacing:0.05em; padding:9px 14px; text-align:left; border-bottom:1px solid var(--border); }
+    .data-table td { padding:10px 14px; font-size:0.75rem; color:var(--t2); border-bottom:1px solid var(--border); font-family:var(--mono); }
+    .data-table tr:last-child td { border-bottom:none; }
+    .data-table tr:hover td { background:rgba(255,255,255,0.018); }
+    .range-btns { display:flex; gap:6px; margin-bottom:16px; }
+    .rb { padding:5px 12px; background:var(--bg2); border:1px solid var(--border); border-radius:4px; font-size:0.7rem; font-weight:500; color:var(--t3); cursor:pointer; transition:all 0.15s; font-family:var(--font); }
+    .rb:hover { color:var(--t2); }
+    .rb.on { background:var(--blue-glow); border-color:rgba(59,130,246,0.35); color:var(--blue-lt); }
+  </style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="nav-logo">Digit<span>Twin</span></div>
+  <div class="nav-links">
+    <a class="nav-link" href="dashboard.html">Overview</a>
+    <a class="nav-link" href="twin.html">3D Twin</a>
+    <a class="nav-link active" href="analytics.html">Analytics</a>
+    <a class="nav-link" href="maintenance.html">Maintenance</a>
+  </div>
+  <div class="nav-right">
+    <div class="nav-time" id="navClock">--:--:--</div>
+    <div class="nav-user"><div class="user-av">OP</div><div class="user-nm">Operator</div></div>
+  </div>
+</nav>
+<nav class="sidenav">
+  <div class="side-section">
+    <div class="side-label">Monitor</div>
+    <a class="side-link" href="dashboard.html">Overview</a>
+    <a class="side-link" href="twin.html">3D Digital Twin</a>
+    <a class="side-link" href="sensors.html">Sensor Network <span class="side-chip sc-blue">48</span></a>
+    <a class="side-link" href="alerts.html">Live Alerts <span class="side-chip sc-red">3</span></a>
+  </div>
+  <div class="side-section">
+    <div class="side-label">Analytics</div>
+    <a class="side-link" href="analytics.html">Performance</a>
+    <a class="side-link active" href="history.html">Historical Data</a>
+    <a class="side-link" href="faults.html">Fault Analysis</a>
+  </div>
+  <div class="side-section">
+    <div class="side-label">Platforms</div>
+    <a class="side-ext" href="https://factoryonline-production.up.railway.app/" target="_blank">Smart Factory <span class="side-ext-icon">↗</span></a>
+    <a class="side-ext" href="https://predictivemaintenance-91fu.onrender.com/" target="_blank">Pred. Maintenance <span class="side-ext-icon">↗</span></a>
+    <a class="side-ext" href="https://mechsim.onrender.com/" target="_blank">MECHSIM <span class="side-ext-icon">↗</span></a>
+  </div>
+  <div class="side-section">
+    <div class="side-label">System</div>
+    <a class="side-link" href="settings.html">Configuration</a>
+    <a class="side-link" href="reports.html">Reports</a>
+  </div>
+  <div class="side-bottom"><a class="side-logout" href="index.html">← Sign Out</a></div>
+</nav>
+<main class="main">
+  <div style="margin-bottom:20px;" class="fade-in">
+    <div class="page-title">Historical Data</div>
+    <div class="page-sub">DigitTwin / Analytics / Historical — Trend analysis and export</div>
+  </div>
+
+  <div class="range-btns fade-in d1">
+    <button class="rb" onclick="setRange('24h',this)">24h</button>
+    <button class="rb" onclick="setRange('7d',this)">7 Days</button>
+    <button class="rb on" onclick="setRange('30d',this)">30 Days</button>
+    <button class="rb" onclick="setRange('90d',this)">90 Days</button>
+    <button class="rb" onclick="setRange('1y',this)">1 Year</button>
+    <button class="btn" style="margin-left:auto">↓ &nbsp;Export CSV</button>
+  </div>
+
+  <div class="hist-grid fade-in d2">
+    <div class="chart-card">
+      <div class="cc-title">OEE Trend</div>
+      <div class="cc-sub">Overall Equipment Effectiveness — last 30 days</div>
+      <div class="sparkline" id="oeeSpark"></div>
+      <div class="x-labels"><span class="x-lbl">30d ago</span><span class="x-lbl">15d ago</span><span class="x-lbl">Today</span></div>
+    </div>
+    <div class="chart-card">
+      <div class="cc-title">Machine Utilisation</div>
+      <div class="cc-sub">Average across all 26 machines — last 30 days</div>
+      <div class="sparkline" id="utilSpark"></div>
+      <div class="x-labels"><span class="x-lbl">30d ago</span><span class="x-lbl">15d ago</span><span class="x-lbl">Today</span></div>
+    </div>
+    <div class="chart-card">
+      <div class="cc-title">Alert Frequency</div>
+      <div class="cc-sub">Total alerts per day — last 30 days</div>
+      <div class="sparkline" id="alertSpark"></div>
+      <div class="x-labels"><span class="x-lbl">30d ago</span><span class="x-lbl">15d ago</span><span class="x-lbl">Today</span></div>
+    </div>
+    <div class="chart-card">
+      <div class="cc-title">Mean Time Between Failures</div>
+      <div class="cc-sub">MTBF in days — last 30 days</div>
+      <div class="sparkline" id="mtbfSpark"></div>
+      <div class="x-labels"><span class="x-lbl">30d ago</span><span class="x-lbl">15d ago</span><span class="x-lbl">Today</span></div>
+    </div>
+  </div>
+
+  <div class="card fade-in d3" style="overflow:hidden;">
+    <div class="card-header"><span class="card-title">Daily Summary Log</span><span class="badge-blue">Last 30 Days</span></div>
+    <table class="data-table">
+      <thead><tr><th>Date</th><th>OEE</th><th>Utilisation</th><th>Alerts</th><th>Downtime</th><th>MTBF</th><th>Production</th></tr></thead>
+      <tbody id="histBody"></tbody>
+    </table>
+  </div>
+</main>
+<script>
+  setInterval(()=>document.getElementById('navClock').textContent=new Date().toTimeString().slice(0,8)+' UTC',1000);
+
+  function setRange(r,btn){document.querySelectorAll('.rb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
+
+  function makeSpark(id, vals, color, opacity=0.55) {
+    const el = document.getElementById(id);
+    const mx = Math.max(...vals);
+    el.innerHTML = vals.map(v=>`<div class="spark" style="height:${(v/mx*100)}%;background:${color};opacity:${opacity}" title="${v}"></div>`).join('');
+  }
+
+  const oeeVals =  [82,84,83,85,86,84,87,85,88,86,85,87,88,86,89,87,88,90,87,89,88,87,89,90,88,89,87,88,90,87];
+  const utilVals = [71,74,73,76,78,75,79,77,80,78,77,79,80,78,82,80,81,83,80,82,81,80,82,83,81,82,80,81,83,82];
+  const alertV =   [5,3,4,6,2,3,5,4,3,7,4,3,5,6,2,4,3,5,4,3,6,4,3,5,4,3,4,5,3,4];
+  const mtbfV =    [3.8,3.9,4.0,3.8,4.1,4.2,4.0,4.1,4.3,4.0,4.1,4.2,4.1,4.3,4.4,4.2,4.3,4.4,4.3,4.4,4.2,4.3,4.4,4.5,4.3,4.4,4.2,4.3,4.4,4.2];
+
+  makeSpark('oeeSpark',  oeeVals,  '#3b82f6');
+  makeSpark('utilSpark', utilVals, '#14b8a6');
+  makeSpark('alertSpark',alertV,   '#f59e0b');
+  makeSpark('mtbfSpark', mtbfV,    '#10b981');
+
+  const tbody = document.getElementById('histBody');
+  const today = new Date();
+  tbody.innerHTML = Array.from({length:30},(_,i)=>{
+    const d = new Date(today); d.setDate(d.getDate()-29+i);
+    const ds = d.toISOString().slice(0,10);
+    return `<tr>
+      <td>${ds}</td>
+      <td style="color:var(--blue-lt)">${oeeVals[i]}%</td>
+      <td>${utilVals[i]}%</td>
+      <td style="color:${alertV[i]>5?'var(--amber-lt)':'var(--t2)'}">${alertV[i]}</td>
+      <td>${(Math.random()*1.5).toFixed(1)} hrs</td>
+      <td>${mtbfV[i]}d</td>
+      <td>${(850+Math.random()*100).toFixed(0)} units</td>
+    </tr>`;
+  }).reverse().join('');
+</script>
+</body>
+</html>

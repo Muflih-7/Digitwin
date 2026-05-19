@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DigitTwin — Maintenance</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .maint-grid { display:grid; grid-template-columns:1fr 300px; gap:16px; }
+    .wo-table { width:100%; border-collapse:collapse; }
+    .wo-table th { font-size:0.65rem; font-weight:600; color:var(--t3); text-transform:uppercase; letter-spacing:0.05em; padding:8px 14px; text-align:left; border-bottom:1px solid var(--border); background:var(--bg); }
+    .wo-table td { padding:11px 14px; font-size:0.78rem; color:var(--t2); border-bottom:1px solid var(--border); vertical-align:middle; }
+    .wo-table tr:last-child td { border-bottom:none; }
+    .wo-table tr:hover td { background:rgba(255,255,255,0.018); }
+    .wo-id { font-family:var(--mono); font-size:0.7rem; color:var(--t3); }
+    .prio-high{color:var(--red-lt);font-weight:600;font-size:0.72rem;} .prio-med{color:var(--amber-lt);font-weight:600;font-size:0.72rem;} .prio-low{color:var(--green-lt);font-weight:600;font-size:0.72rem;}
+    .rul-bar-cell { min-width:120px; }
+    .ml-card { background:var(--bg2); border:1px solid var(--border); border-radius:6px; padding:18px; margin-bottom:14px; }
+    .ml-title { font-size:0.78rem; font-weight:600; color:var(--t2); text-transform:uppercase; letter-spacing:0.03em; margin-bottom:14px; }
+    .ml-item { display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid var(--border); }
+    .ml-item:last-child { border-bottom:none; }
+    .ml-name { font-size:0.75rem; color:var(--t2); }
+    .ml-val { font-family:var(--mono); font-size:0.72rem; font-weight:500; }
+    .summary-cards { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
+    .sc { background:var(--bg2); border:1px solid var(--border); border-radius:6px; padding:14px; }
+    .sc-val { font-size:1.4rem; font-weight:700; letter-spacing:-0.02em; margin-bottom:3px; }
+    .sc-lbl { font-size:0.65rem; color:var(--t3); font-weight:500; text-transform:uppercase; letter-spacing:0.04em; }
+  </style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="nav-logo">Digit<span>Twin</span></div>
+  <div class="nav-links">
+    <a class="nav-link" href="dashboard.html">Overview</a>
+    <a class="nav-link" href="twin.html">3D Twin</a>
+    <a class="nav-link" href="analytics.html">Analytics</a>
+    <a class="nav-link active" href="maintenance.html">Maintenance</a>
+  </div>
+  <div class="nav-right">
+    <div class="nav-time" id="navClock">--:--:--</div>
+    <div class="nav-user"><div class="user-av">OP</div><div class="user-nm">Operator</div></div>
+  </div>
+</nav>
+<nav class="sidenav">
+  <div class="side-section">
+    <div class="side-label">Monitor</div>
+    <a class="side-link" href="dashboard.html">Overview</a>
+    <a class="side-link" href="twin.html">3D Digital Twin</a>
+    <a class="side-link" href="sensors.html">Sensor Network <span class="side-chip sc-blue">48</span></a>
+    <a class="side-link" href="alerts.html">Live Alerts <span class="side-chip sc-red">3</span></a>
+  </div>
+  <div class="side-section">
+    <div class="side-label">Analytics</div>
+    <a class="side-link" href="analytics.html">Performance</a>
+    <a class="side-link" href="history.html">Historical Data</a>
+    <a class="side-link" href="faults.html">Fault Analysis</a>
+  </div>
+  <div class="side-section">
+    <div class="side-label">Platforms</div>
+    <a class="side-ext" href="https://factoryonline-production.up.railway.app/" target="_blank">Smart Factory <span class="side-ext-icon">↗</span></a>
+    <a class="side-ext" href="https://predictivemaintenance-91fu.onrender.com/" target="_blank">Pred. Maintenance <span class="side-ext-icon">↗</span></a>
+    <a class="side-ext" href="https://mechsim.onrender.com/" target="_blank">MECHSIM <span class="side-ext-icon">↗</span></a>
+    <a class="side-ext" href="https://optimalprint.onrender.com/" target="_blank">OptimalPrint <span class="side-ext-icon">↗</span></a>
+  </div>
+  <div class="side-section">
+    <div class="side-label">System</div>
+    <a class="side-link" href="settings.html">Configuration</a>
+    <a class="side-link" href="reports.html">Reports</a>
+  </div>
+  <div class="side-bottom"><a class="side-logout" href="index.html">← Sign Out</a></div>
+</nav>
+<main class="main">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;" class="fade-in">
+    <div>
+      <div class="page-title">Maintenance Management</div>
+      <div class="page-sub">DigitTwin / Maintenance — Work Orders & Predictive Scheduling</div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn">↓ Export Report</button>
+      <button class="btn btn-primary">+ New Work Order</button>
+    </div>
+  </div>
+  <div class="summary-cards fade-in d1">
+    <div class="sc"><div class="sc-val" style="color:var(--red-lt)">1</div><div class="sc-lbl">Critical — Immediate Action</div></div>
+    <div class="sc"><div class="sc-val" style="color:var(--amber-lt)">3</div><div class="sc-lbl">Open Work Orders</div></div>
+    <div class="sc"><div class="sc-val" style="color:var(--blue-lt)">5</div><div class="sc-lbl">Scheduled Next 7 Days</div></div>
+    <div class="sc"><div class="sc-val" style="color:var(--green-lt)">12</div><div class="sc-lbl">Completed This Month</div></div>
+  </div>
+  <div class="maint-grid fade-in d2">
+    <div>
+      <div class="card" style="overflow:hidden;margin-bottom:16px;">
+        <div class="card-header"><span class="card-title">Open Work Orders</span><span class="badge-amber">3 Open</span></div>
+        <table class="wo-table">
+          <thead><tr><th>WO #</th><th>Machine</th><th>Issue</th><th>Priority</th><th>RUL</th><th>Due</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td class="wo-id">WO-441</td><td style="color:var(--t1);font-weight:500">CNC M-07</td><td>Spindle bearing replacement</td><td class="prio-high">CRITICAL</td><td class="rul-bar-cell"><div style="display:flex;align-items:center;gap:8px;"><span style="font-family:var(--mono);font-size:0.7rem;color:var(--red-lt);width:48px">82 hrs</span><div class="progress" style="flex:1"><div class="progress-bar pb-red" style="width:8%"></div></div></div></td><td style="color:var(--red-lt);font-family:var(--mono);font-size:0.7rem">Immediate</td><td><span class="badge-red">Open</span></td></tr>
+            <tr><td class="wo-id">WO-438</td><td style="color:var(--t1);font-weight:500">Conveyor CB-03</td><td>Bearing inspection and lubrication</td><td class="prio-med">MEDIUM</td><td class="rul-bar-cell"><div style="display:flex;align-items:center;gap:8px;"><span style="font-family:var(--mono);font-size:0.7rem;color:var(--amber-lt);width:48px">420 hrs</span><div class="progress" style="flex:1"><div class="progress-bar pb-amber" style="width:32%"></div></div></div></td><td style="font-family:var(--mono);font-size:0.7rem;color:var(--t2)">2025-05-20</td><td><span class="badge-amber">Open</span></td></tr>
+            <tr><td class="wo-id">WO-440</td><td style="color:var(--t1);font-weight:500">Hydraulic HP-02</td><td>Oil seal inspection</td><td class="prio-med">MEDIUM</td><td class="rul-bar-cell"><div style="display:flex;align-items:center;gap:8px;"><span style="font-family:var(--mono);font-size:0.7rem;color:var(--amber-lt);width:48px">650 hrs</span><div class="progress" style="flex:1"><div class="progress-bar pb-amber" style="width:48%"></div></div></div></td><td style="font-family:var(--mono);font-size:0.7rem;color:var(--t2)">2025-05-25</td><td><span class="badge-amber">Open</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card" style="overflow:hidden;">
+        <div class="card-header"><span class="card-title">Recently Resolved</span><span class="badge-green">This Month</span></div>
+        <table class="wo-table">
+          <thead><tr><th>WO #</th><th>Machine</th><th>Issue</th><th>Resolved</th><th>Duration</th></tr></thead>
+          <tbody>
+            <tr><td class="wo-id">WO-437</td><td>Robot Arm RA-12</td><td>Joint actuator replacement</td><td style="font-family:var(--mono);font-size:0.7rem">2025-05-02</td><td style="font-family:var(--mono);font-size:0.7rem;color:var(--green-lt)">1.5 hrs</td></tr>
+            <tr><td class="wo-id">WO-435</td><td>Press PP-01</td><td>Hydraulic fluid top-up</td><td style="font-family:var(--mono);font-size:0.7rem">2025-04-28</td><td style="font-family:var(--mono);font-size:0.7rem;color:var(--green-lt)">0.8 hrs</td></tr>
+            <tr><td class="wo-id">WO-432</td><td>CNC M-02</td><td>Spindle calibration — annual</td><td style="font-family:var(--mono);font-size:0.7rem">2025-04-20</td><td style="font-family:var(--mono);font-size:0.7rem;color:var(--green-lt)">2.2 hrs</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div class="ml-card">
+        <div class="ml-title">ML Failure Predictions</div>
+        <div class="ml-item"><div><div class="ml-name" style="color:var(--red-lt);font-weight:600">CNC M-07</div><div style="font-size:0.65rem;color:var(--t3)">Spindle bearing failure</div></div><div style="text-align:right;"><div class="ml-val" style="color:var(--red-lt)">82 hrs</div><div style="font-size:0.6rem;color:var(--t3)">RUL estimate</div></div></div>
+        <div class="ml-item"><div><div class="ml-name">Conveyor CB-03</div><div style="font-size:0.65rem;color:var(--t3)">Bearing wear — thermal</div></div><div style="text-align:right;"><div class="ml-val" style="color:var(--amber-lt)">420 hrs</div><div style="font-size:0.6rem;color:var(--t3)">RUL estimate</div></div></div>
+        <div class="ml-item"><div><div class="ml-name">Hydraulic HP-02</div><div style="font-size:0.65rem;color:var(--t3)">Oil seal degradation</div></div><div style="text-align:right;"><div class="ml-val" style="color:var(--amber-lt)">650 hrs</div><div style="font-size:0.6rem;color:var(--t3)">RUL estimate</div></div></div>
+        <div class="ml-item"><div><div class="ml-name">Grinder GR-04</div><div style="font-size:0.65rem;color:var(--t3)">Grinding wheel wear</div></div><div style="text-align:right;"><div class="ml-val" style="color:var(--blue-lt)">1,920 hrs</div><div style="font-size:0.6rem;color:var(--t3)">RUL estimate</div></div></div>
+        <div style="margin-top:14px;"><a href="https://predictivemaintenance-91fu.onrender.com/" target="_blank" class="btn btn-primary" style="width:100%;justify-content:center;font-size:0.72rem;">Open Pred. Maintenance ↗</a></div>
+      </div>
+      <div class="ml-card">
+        <div class="ml-title">Model Performance</div>
+        <div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;margin-bottom:5px;"><span style="font-size:0.7rem;color:var(--t2)">Prediction Accuracy</span><span style="font-family:var(--mono);font-size:0.7rem;color:var(--green-lt)">96.4%</span></div><div class="progress"><div class="progress-bar pb-green" style="width:96.4%"></div></div></div>
+        <div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;margin-bottom:5px;"><span style="font-size:0.7rem;color:var(--t2)">False Positive Rate</span><span style="font-family:var(--mono);font-size:0.7rem;color:var(--blue-lt)">3.6%</span></div><div class="progress"><div class="progress-bar pb-blue" style="width:3.6%"></div></div></div>
+        <div><div style="display:flex;justify-content:space-between;margin-bottom:5px;"><span style="font-size:0.7rem;color:var(--t2)">Model Confidence</span><span style="font-family:var(--mono);font-size:0.7rem;color:var(--teal-lt)">91.2%</span></div><div class="progress"><div class="progress-bar" style="width:91.2%;background:var(--teal-lt)"></div></div></div>
+      </div>
+    </div>
+  </div>
+</main>
+<script>
+  setInterval(()=>document.getElementById('navClock').textContent=new Date().toTimeString().slice(0,8)+' UTC',1000);
+</script>
+</body>
+</html>

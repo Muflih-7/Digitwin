@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DigitTwin — Loading</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { display:flex; align-items:center; justify-content:center; min-height:100vh; }
+    .load-wrap { width:100%; max-width:520px; padding:0 24px; }
+    .load-logo { font-size:1.1rem; font-weight:700; color:var(--t1); letter-spacing:-0.02em; margin-bottom:40px; }
+    .load-logo span { color:var(--blue-lt); }
+    .load-title { font-size:1.4rem; font-weight:700; color:var(--t1); margin-bottom:4px; letter-spacing:-0.02em; }
+    .load-sub { font-size:0.78rem; color:var(--t3); margin-bottom:32px; }
+    .master-bar-wrap { margin-bottom:6px; }
+    .mb-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+    .mb-label { font-size:0.72rem; font-weight:500; color:var(--t2); }
+    .mb-pct { font-family:var(--mono); font-size:0.72rem; color:var(--blue-lt); font-weight:500; }
+    .mb-track { height:4px; background:var(--border); border-radius:2px; overflow:hidden; }
+    .mb-fill { height:100%; background:var(--blue-lt); border-radius:2px; width:0%; transition:width 0.4s ease; }
+    .mb-task { font-size:0.68rem; color:var(--t3); font-family:var(--mono); margin-top:5px; min-height:1em; }
+    .sub-bars { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:14px; margin-top:20px; margin-bottom:28px; }
+    .sb-item {}
+    .sb-name { font-size:0.62rem; font-weight:500; color:var(--t3); display:flex; justify-content:space-between; margin-bottom:5px; }
+    .sb-name span { font-family:var(--mono); color:var(--t2); }
+    .sb-track { height:2px; background:var(--border); border-radius:1px; overflow:hidden; }
+    .sb-fill { height:100%; border-radius:1px; width:0%; transition:width 0.5s ease; }
+    .sf-blue   { background:var(--blue-lt); }
+    .sf-teal   { background:var(--teal-lt); }
+    .sf-amber  { background:var(--amber-lt); }
+    .sf-purple { background:#a855f7; }
+    .log-box { background:var(--bg2); border:1px solid var(--border); border-radius:6px; padding:14px 16px; font-family:var(--mono); font-size:0.68rem; line-height:1.7; max-height:180px; overflow:hidden; }
+    .log-line { color:var(--t4); opacity:0; transform:translateX(-4px); transition:all 0.3s ease; }
+    .log-line.show { opacity:1; transform:none; }
+    .log-line.ok   { color:var(--green-lt); }
+    .log-line.warn { color:var(--amber-lt); }
+    .log-line.info { color:var(--blue-lt); }
+  </style>
+</head>
+<body>
+  <div class="load-wrap fade-in">
+    <div class="load-logo">Digit<span>Twin</span></div>
+    <div class="load-title">Initializing Platform</div>
+    <div class="load-sub">Loading subsystems and establishing connections…</div>
+
+    <div class="master-bar-wrap">
+      <div class="mb-header">
+        <span class="mb-label">System Load Progress</span>
+        <span class="mb-pct" id="mbPct">0%</span>
+      </div>
+      <div class="mb-track"><div class="mb-fill" id="mbFill"></div></div>
+      <div class="mb-task" id="mbTask">Initializing…</div>
+    </div>
+
+    <div class="sub-bars">
+      <div class="sb-item">
+        <div class="sb-name">Smart Factory <span id="sf-p">0%</span></div>
+        <div class="sb-track"><div class="sb-fill sf-blue" id="sfFill"></div></div>
+      </div>
+      <div class="sb-item">
+        <div class="sb-name">Pred. Maint. <span id="pm-p">0%</span></div>
+        <div class="sb-track"><div class="sb-fill sf-teal" id="pmFill"></div></div>
+      </div>
+      <div class="sb-item">
+        <div class="sb-name">MECHSIM <span id="ms-p">0%</span></div>
+        <div class="sb-track"><div class="sb-fill sf-amber" id="msFill"></div></div>
+      </div>
+      <div class="sb-item">
+        <div class="sb-name">OptimalPrint <span id="op-p">0%</span></div>
+        <div class="sb-track"><div class="sb-fill sf-purple" id="opFill"></div></div>
+      </div>
+    </div>
+
+    <div class="log-box" id="logBox">
+      <div class="log-line" id="l1"><span style="color:var(--t4)">[INFO ]</span> Starting DigitTwin platform services</div>
+      <div class="log-line" id="l2"><span style="color:var(--green-lt)">[  OK ]</span> Authentication module ready</div>
+      <div class="log-line" id="l3"><span style="color:var(--green-lt)">[  OK ]</span> Database connection established</div>
+      <div class="log-line" id="l4"><span style="color:var(--t4)">[INFO ]</span> Connecting to Smart Factory — 192.168.1.10</div>
+      <div class="log-line" id="l5"><span style="color:var(--green-lt)">[  OK ]</span> Smart Factory telemetry stream active (48 nodes)</div>
+      <div class="log-line" id="l6"><span style="color:var(--t4)">[INFO ]</span> Loading predictive ML models — Isolation Forest v3.2</div>
+      <div class="log-line" id="l7"><span style="color:var(--green-lt)">[  OK ]</span> ML models loaded — 96.4% accuracy</div>
+      <div class="log-line" id="l8"><span style="color:var(--green-lt)">[  OK ]</span> MECHSIM engineering solver initialized</div>
+      <div class="log-line" id="l9"><span style="color:var(--green-lt)">[  OK ]</span> OptimalPrint print scheduler connected</div>
+      <div class="log-line" id="l10"><span style="color:var(--amber-lt)">[WARN ]</span> Sensor Node B4 — signal quality degraded (67%)</div>
+      <div class="log-line" id="l11"><span style="color:var(--t4)">[INFO ]</span> Rendering 3D digital twin — WebGL context ready</div>
+      <div class="log-line" id="l12"><span style="color:var(--green-lt)">[  OK ]</span> All systems nominal — launching dashboard</div>
+    </div>
+  </div>
+
+  <script>
+    const steps = [
+      { t:0,    pct:0,   task:'Initializing core…',               sf:0,  pm:0,  ms:0,  op:0  },
+      { t:400,  pct:8,   task:'Loading auth module…',             sf:15, pm:5,  ms:5,  op:5  },
+      { t:900,  pct:20,  task:'Establishing database connection…', sf:30, pm:15, ms:10, op:10 },
+      { t:1400, pct:34,  task:'Connecting to Smart Factory…',      sf:65, pm:25, ms:18, op:15 },
+      { t:2000, pct:50,  task:'Loading ML models…',               sf:95, pm:60, ms:28, op:25 },
+      { t:2600, pct:63,  task:'Initializing MECHSIM solver…',     sf:100,pm:78, ms:65, op:40 },
+      { t:3100, pct:74,  task:'Connecting OptimalPrint…',         sf:100,pm:88, ms:82, op:75 },
+      { t:3700, pct:86,  task:'Calibrating sensor network…',      sf:100,pm:96, ms:92, op:95 },
+      { t:4300, pct:95,  task:'Rendering 3D twin mesh…',          sf:100,pm:100,ms:100,op:100 },
+      { t:4800, pct:100, task:'All systems ready.',               sf:100,pm:100,ms:100,op:100 },
+    ];
+
+    const lines = [
+      {id:'l1',t:150},{id:'l2',t:500},{id:'l3',t:900},
+      {id:'l4',t:1300},{id:'l5',t:1800},{id:'l6',t:2100},
+      {id:'l7',t:2700},{id:'l8',t:3000},{id:'l9',t:3200},
+      {id:'l10',t:3600},{id:'l11',t:4000},{id:'l12',t:4700}
+    ];
+
+    steps.forEach(({t,pct,task,sf,pm,ms,op}) => setTimeout(() => {
+      document.getElementById('mbFill').style.width  = pct+'%';
+      document.getElementById('mbPct').textContent   = pct+'%';
+      document.getElementById('mbTask').textContent  = task;
+      document.getElementById('sfFill').style.width  = sf+'%';
+      document.getElementById('pmFill').style.width  = pm+'%';
+      document.getElementById('msFill').style.width  = ms+'%';
+      document.getElementById('opFill').style.width  = op+'%';
+      document.getElementById('sf-p').textContent    = sf+'%';
+      document.getElementById('pm-p').textContent    = pm+'%';
+      document.getElementById('ms-p').textContent    = ms+'%';
+      document.getElementById('op-p').textContent    = op+'%';
+    }, t));
+
+    lines.forEach(({id,t}) => setTimeout(() => {
+      document.getElementById(id)?.classList.add('show');
+    }, t));
+
+    setTimeout(() => window.location.href='dashboard.html', 5400);
+  </script>
+</body>
+</html>

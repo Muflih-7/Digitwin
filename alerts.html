@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DigitTwin — Live Alerts</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .alert-table { width:100%; border-collapse:collapse; }
+    .alert-table th { font-size:0.65rem; font-weight:600; color:var(--t3); text-transform:uppercase; letter-spacing:0.05em; padding:9px 14px; text-align:left; border-bottom:1px solid var(--border); background:var(--bg); }
+    .alert-table td { padding:12px 14px; font-size:0.78rem; color:var(--t2); border-bottom:1px solid var(--border); vertical-align:middle; }
+    .alert-table tr:last-child td { border-bottom:none; }
+    .alert-table tr:hover td { background:rgba(255,255,255,0.018); }
+    .sev-pill { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:3px; font-size:0.65rem; font-weight:600; }
+    .sev-crit { background:var(--red-glow); border:1px solid rgba(239,68,68,0.25); color:var(--red-lt); }
+    .sev-warn { background:var(--amber-glow); border:1px solid rgba(245,158,11,0.25); color:var(--amber-lt); }
+    .sev-info { background:var(--blue-glow); border:1px solid rgba(59,130,246,0.25); color:var(--blue-lt); }
+    .sev-ok   { background:var(--green-glow); border:1px solid rgba(16,185,129,0.25); color:var(--green-lt); }
+    .sum-row { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px; }
+    .sum-c { background:var(--bg2); border:1px solid var(--border); border-radius:6px; padding:14px 16px; }
+    .sum-v { font-size:1.6rem; font-weight:700; letter-spacing:-0.02em; margin-bottom:3px; }
+    .sum-l { font-size:0.65rem; color:var(--t3); font-weight:500; text-transform:uppercase; letter-spacing:0.04em; }
+    .filter-row { display:flex; gap:8px; margin-bottom:16px; }
+    .filter-btn { padding:6px 14px; background:var(--bg2); border:1px solid var(--border); border-radius:4px; font-size:0.72rem; font-weight:500; color:var(--t3); cursor:pointer; transition:all 0.15s; font-family:var(--font); }
+    .filter-btn:hover { color:var(--t2); border-color:var(--border2); }
+    .filter-btn.on { background:var(--blue-glow); border-color:rgba(59,130,246,0.35); color:var(--blue-lt); }
+  </style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="nav-logo">Digit<span>Twin</span></div>
+  <div class="nav-links">
+    <a class="nav-link" href="dashboard.html">Overview</a>
+    <a class="nav-link" href="twin.html">3D Twin</a>
+    <a class="nav-link" href="analytics.html">Analytics</a>
+    <a class="nav-link" href="maintenance.html">Maintenance</a>
+  </div>
+  <div class="nav-right">
+    <div class="nav-time" id="navClock">--:--:--</div>
+    <div class="nav-user"><div class="user-av">OP</div><div class="user-nm">Operator</div></div>
+  </div>
+</nav>
+<nav class="sidenav">
+  <div class="side-section">
+    <div class="side-label">Monitor</div>
+    <a class="side-link" href="dashboard.html">Overview</a>
+    <a class="side-link" href="twin.html">3D Digital Twin</a>
+    <a class="side-link" href="sensors.html">Sensor Network <span class="side-chip sc-blue">48</span></a>
+    <a class="side-link active" href="alerts.html">Live Alerts <span class="side-chip sc-red">3</span></a>
+  </div>
+  <div class="side-section">
+    <div class="side-label">Analytics</div>
+    <a class="side-link" href="analytics.html">Performance</a>
+    <a class="side-link" href="history.html">Historical Data</a>
+    <a class="side-link" href="faults.html">Fault Analysis</a>
+  </div>
+  <div class="side-section">
+    <div class="side-label">Platforms</div>
+    <a class="side-ext" href="https://factoryonline-production.up.railway.app/" target="_blank">Smart Factory <span class="side-ext-icon">↗</span></a>
+    <a class="side-ext" href="https://predictivemaintenance-91fu.onrender.com/" target="_blank">Pred. Maintenance <span class="side-ext-icon">↗</span></a>
+    <a class="side-ext" href="https://mechsim.onrender.com/" target="_blank">MECHSIM <span class="side-ext-icon">↗</span></a>
+  </div>
+  <div class="side-section">
+    <div class="side-label">System</div>
+    <a class="side-link" href="settings.html">Configuration</a>
+    <a class="side-link" href="reports.html">Reports</a>
+  </div>
+  <div class="side-bottom"><a class="side-logout" href="index.html">← Sign Out</a></div>
+</nav>
+<main class="main">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;" class="fade-in">
+    <div>
+      <div class="page-title">Live Alerts</div>
+      <div class="page-sub">DigitTwin / Monitor / Alerts — Real-time fault and warning feed</div>
+    </div>
+    <button class="btn btn-primary" onclick="refreshAlerts()">↻ &nbsp;Refresh Feed</button>
+  </div>
+
+  <div class="sum-row fade-in d1">
+    <div class="sum-c"><div class="sum-v" style="color:var(--red-lt)">1</div><div class="sum-l">Critical Active</div></div>
+    <div class="sum-c"><div class="sum-v" style="color:var(--amber-lt)">2</div><div class="sum-l">Warnings Active</div></div>
+    <div class="sum-c"><div class="sum-v" style="color:var(--green-lt)">12</div><div class="sum-l">Resolved Today</div></div>
+    <div class="sum-c"><div class="sum-v" style="color:var(--blue-lt)">4.2 min</div><div class="sum-l">Avg. Response Time</div></div>
+  </div>
+
+  <div class="filter-row fade-in d2">
+    <button class="filter-btn on" onclick="filterAlerts('all',this)">All</button>
+    <button class="filter-btn" onclick="filterAlerts('critical',this)">Critical</button>
+    <button class="filter-btn" onclick="filterAlerts('warning',this)">Warning</button>
+    <button class="filter-btn" onclick="filterAlerts('resolved',this)">Resolved</button>
+    <button class="filter-btn" onclick="filterAlerts('info',this)">Info</button>
+  </div>
+
+  <div class="card fade-in d3" style="overflow:hidden;">
+    <table class="alert-table" id="alertTable">
+      <thead><tr><th>Severity</th><th>Machine / Node</th><th>Description</th><th>Zone</th><th>Time</th><th>Status</th></tr></thead>
+      <tbody id="alertBody"></tbody>
+    </table>
+  </div>
+</main>
+<script>
+  setInterval(()=>document.getElementById('navClock').textContent=new Date().toTimeString().slice(0,8)+' UTC',1000);
+
+  const allAlerts = [
+    { sev:'critical', machine:'CNC Machine M-07', desc:'Spindle vibration exceeds 12.4 mm/s — bearing failure imminent', zone:'Zone B', time:'4 min ago',   status:'active' },
+    { sev:'warning',  machine:'Conveyor CB-03',   desc:'Bearing temperature elevated: 78°C (limit 85°C)',            zone:'Zone A', time:'18 min ago',  status:'active' },
+    { sev:'warning',  machine:'Hydraulic HP-02',  desc:'Oil pressure fluctuation ±8% above baseline',                zone:'Zone C', time:'31 min ago',  status:'active' },
+    { sev:'info',     machine:'Sensor Node B4',   desc:'Signal quality degraded to 67% — calibration recommended',   zone:'Zone B', time:'3 hr ago',    status:'active' },
+    { sev:'ok',       machine:'Robot Arm RA-12',  desc:'Maintenance completed — joint actuator replaced',            zone:'Zone A', time:'2 hr ago',    status:'resolved' },
+    { sev:'ok',       machine:'Press PP-01',      desc:'Hydraulic fluid top-up completed successfully',              zone:'Zone B', time:'5 hr ago',    status:'resolved' },
+    { sev:'warning',  machine:'Sensor Node C9',   desc:'Node offline — connection lost',                             zone:'Zone C', time:'6 hr ago',    status:'resolved' },
+    { sev:'critical', machine:'CNC Machine M-03', desc:'Emergency stop triggered — operator intervention',           zone:'Zone A', time:'8 hr ago',    status:'resolved' },
+    { sev:'info',     machine:'Roof Truss RT-02', desc:'Vibration sensor scheduled for annual calibration',          zone:'Zone B', time:'12 hr ago',   status:'resolved' },
+    { sev:'warning',  machine:'Grinder GR-04',    desc:'Grinding wheel wear at 45% — replacement due in 200 hrs',   zone:'Zone C', time:'1 day ago',   status:'resolved' },
+    { sev:'ok',       machine:'CNC Machine M-02', desc:'Spindle calibration completed — annual schedule',            zone:'Zone A', time:'2 days ago',  status:'resolved' },
+    { sev:'info',     machine:'Paint Booth PT-01',desc:'Filter replacement reminder — 1,200 hrs elapsed',           zone:'Zone C', time:'3 days ago',  status:'resolved' },
+  ];
+
+  const sevMap = {
+    critical: '<span class="sev-pill sev-crit"><span class="dot dot-pulse" style="background:#ef4444"></span>Critical</span>',
+    warning:  '<span class="sev-pill sev-warn">Warning</span>',
+    info:     '<span class="sev-pill sev-info">Info</span>',
+    ok:       '<span class="sev-pill sev-ok">Resolved</span>',
+  };
+
+  let currentFilter = 'all';
+
+  function renderAlerts(filter) {
+    const tbody = document.getElementById('alertBody');
+    const filtered = filter==='all' ? allAlerts :
+      filter==='critical' ? allAlerts.filter(a=>a.sev==='critical') :
+      filter==='warning'  ? allAlerts.filter(a=>a.sev==='warning') :
+      filter==='resolved' ? allAlerts.filter(a=>a.status==='resolved') :
+      allAlerts.filter(a=>a.sev==='info');
+    tbody.innerHTML = filtered.map(a=>`
+      <tr>
+        <td>${sevMap[a.sev]}</td>
+        <td style="color:var(--t1);font-weight:500">${a.machine}</td>
+        <td>${a.desc}</td>
+        <td><span style="font-size:0.68rem;color:var(--t3)">${a.zone}</span></td>
+        <td style="font-family:var(--mono);font-size:0.68rem;color:var(--t3)">${a.time}</td>
+        <td><span style="font-size:0.68rem;color:${a.status==='active'?'var(--amber-lt)':'var(--green-lt)'}">${a.status==='active'?'● Active':'✓ Resolved'}</span></td>
+      </tr>
+    `).join('');
+  }
+
+  function filterAlerts(f, btn) {
+    currentFilter = f;
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('on'));
+    btn.classList.add('on');
+    renderAlerts(f);
+  }
+
+  function refreshAlerts() { renderAlerts(currentFilter); }
+
+  renderAlerts('all');
+</script>
+</body>
+</html>

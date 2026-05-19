@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DigitTwin — Reports</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .reports-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px; }
+    .report-card { background:var(--bg2); border:1px solid var(--border); border-radius:6px; padding:20px; transition:all 0.15s; cursor:pointer; }
+    .report-card:hover { border-color:var(--border2); transform:translateY(-1px); box-shadow:0 4px 16px rgba(0,0,0,0.2); }
+    .rc-icon { width:36px; height:36px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:1rem; margin-bottom:12px; }
+    .rci-blue  { background:var(--blue-glow);  border:1px solid rgba(59,130,246,0.2); }
+    .rci-teal  { background:var(--teal-glow);  border:1px solid rgba(20,184,166,0.2); }
+    .rci-amber { background:var(--amber-glow); border:1px solid rgba(245,158,11,0.2); }
+    .rci-green { background:var(--green-glow); border:1px solid rgba(16,185,129,0.2); }
+    .rc-title { font-size:0.9rem; font-weight:700; color:var(--t1); margin-bottom:4px; }
+    .rc-desc { font-size:0.72rem; color:var(--t3); line-height:1.5; margin-bottom:14px; }
+    .rc-meta { display:flex; justify-content:space-between; align-items:center; }
+    .rc-last { font-size:0.65rem; color:var(--t4); font-family:var(--mono); }
+    .recent-table { width:100%; border-collapse:collapse; }
+    .recent-table th { font-size:0.65rem; font-weight:600; color:var(--t3); text-transform:uppercase; letter-spacing:0.05em; padding:9px 14px; text-align:left; border-bottom:1px solid var(--border); }
+    .recent-table td { padding:11px 14px; font-size:0.78rem; color:var(--t2); border-bottom:1px solid var(--border); }
+    .recent-table tr:last-child td { border-bottom:none; }
+    .recent-table tr:hover td { background:rgba(255,255,255,0.018); }
+  </style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="nav-logo">Digit<span>Twin</span></div>
+  <div class="nav-links">
+    <a class="nav-link" href="dashboard.html">Overview</a>
+    <a class="nav-link" href="twin.html">3D Twin</a>
+    <a class="nav-link" href="analytics.html">Analytics</a>
+    <a class="nav-link" href="maintenance.html">Maintenance</a>
+  </div>
+  <div class="nav-right">
+    <div class="nav-time" id="navClock">--:--:--</div>
+    <div class="nav-user"><div class="user-av">OP</div><div class="user-nm">Operator</div></div>
+  </div>
+</nav>
+<nav class="sidenav">
+  <div class="side-section">
+    <div class="side-label">Monitor</div>
+    <a class="side-link" href="dashboard.html">Overview</a>
+    <a class="side-link" href="twin.html">3D Digital Twin</a>
+    <a class="side-link" href="sensors.html">Sensor Network <span class="side-chip sc-blue">48</span></a>
+    <a class="side-link" href="alerts.html">Live Alerts <span class="side-chip sc-red">3</span></a>
+  </div>
+  <div class="side-section">
+    <div class="side-label">Analytics</div>
+    <a class="side-link" href="analytics.html">Performance</a>
+    <a class="side-link" href="history.html">Historical Data</a>
+    <a class="side-link" href="faults.html">Fault Analysis</a>
+  </div>
+  <div class="side-section">
+    <div class="side-label">Platforms</div>
+    <a class="side-ext" href="https://factoryonline-production.up.railway.app/" target="_blank">Smart Factory <span class="side-ext-icon">↗</span></a>
+    <a class="side-ext" href="https://predictivemaintenance-91fu.onrender.com/" target="_blank">Pred. Maintenance <span class="side-ext-icon">↗</span></a>
+    <a class="side-ext" href="https://mechsim.onrender.com/" target="_blank">MECHSIM <span class="side-ext-icon">↗</span></a>
+    <a class="side-ext" href="https://optimalprint.onrender.com/" target="_blank">OptimalPrint <span class="side-ext-icon">↗</span></a>
+  </div>
+  <div class="side-section">
+    <div class="side-label">System</div>
+    <a class="side-link" href="settings.html">Configuration</a>
+    <a class="side-link active" href="reports.html">Reports</a>
+  </div>
+  <div class="side-bottom"><a class="side-logout" href="index.html">← Sign Out</a></div>
+</nav>
+<main class="main">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;" class="fade-in">
+    <div>
+      <div class="page-title">Reports</div>
+      <div class="page-sub">DigitTwin / System / Reports — Generate and download platform reports</div>
+    </div>
+    <button class="btn btn-primary" onclick="this.textContent='Generating…';setTimeout(()=>this.textContent='+ Generate Report',2500)">+ Generate Report</button>
+  </div>
+
+  <div class="reports-grid fade-in d1">
+    <div class="report-card" onclick="dlReport('OEE Performance Report')">
+      <div class="rc-icon rci-blue">📊</div>
+      <div class="rc-title">OEE Performance Report</div>
+      <div class="rc-desc">Overall Equipment Effectiveness breakdown by zone, machine and shift. Includes availability, performance and quality metrics.</div>
+      <div class="rc-meta"><span class="rc-last">Last generated: 2025-05-01</span><span class="badge-blue">Monthly</span></div>
+    </div>
+    <div class="report-card" onclick="dlReport('Maintenance Summary Report')">
+      <div class="rc-icon rci-amber">🔧</div>
+      <div class="rc-title">Maintenance Summary Report</div>
+      <div class="rc-desc">Work order history, completion rates, downtime costs and scheduled upcoming maintenance across all machines.</div>
+      <div class="rc-meta"><span class="rc-last">Last generated: 2025-05-03</span><span class="badge-amber">Weekly</span></div>
+    </div>
+    <div class="report-card" onclick="dlReport('Predictive ML Model Report')">
+      <div class="rc-icon rci-teal">🤖</div>
+      <div class="rc-title">Predictive ML Model Report</div>
+      <div class="rc-desc">ML model accuracy, false positive rates, RUL estimates and failure predictions for the next 30 days across all machines.</div>
+      <div class="rc-meta"><span class="rc-last">Last generated: 2025-05-05</span><span class="badge-green">Weekly</span></div>
+    </div>
+    <div class="report-card" onclick="dlReport('Sensor Network Health Report')">
+      <div class="rc-icon rci-green">📡</div>
+      <div class="rc-title">Sensor Network Health Report</div>
+      <div class="rc-desc">48-node network status, signal quality, offline nodes, calibration schedules and latency statistics.</div>
+      <div class="rc-meta"><span class="rc-last">Last generated: 2025-05-06</span><span class="badge-blue">Daily</span></div>
+    </div>
+    <div class="report-card" onclick="dlReport('Fault Analysis Report')">
+      <div class="rc-icon rci-amber">⚠</div>
+      <div class="rc-title">Fault Analysis Report</div>
+      <div class="rc-desc">Root cause analysis, fault frequency matrix, zone distribution and corrective action tracking for last 90 days.</div>
+      <div class="rc-meta"><span class="rc-last">Last generated: 2025-04-30</span><span class="badge-amber">Monthly</span></div>
+    </div>
+    <div class="report-card" onclick="dlReport('Energy & Efficiency Report')">
+      <div class="rc-icon rci-green">⚡</div>
+      <div class="rc-title">Energy & Efficiency Report</div>
+      <div class="rc-desc">Power consumption per machine, efficiency ratios, idle time analysis and cost per unit produced.</div>
+      <div class="rc-meta"><span class="rc-last">Last generated: 2025-05-01</span><span class="badge-blue">Monthly</span></div>
+    </div>
+  </div>
+
+  <div class="card fade-in d3" style="overflow:hidden;">
+    <div class="card-header"><span class="card-title">Recent Report Downloads</span></div>
+    <table class="recent-table">
+      <thead><tr><th>Report Name</th><th>Generated By</th><th>Date</th><th>Format</th><th>Size</th><th>Action</th></tr></thead>
+      <tbody>
+        <tr><td style="color:var(--t1);font-weight:500">OEE Performance Report — April 2025</td><td>admin</td><td style="font-family:var(--mono);font-size:0.7rem">2025-05-01</td><td><span class="badge-blue">PDF</span></td><td style="font-family:var(--mono);font-size:0.7rem">2.4 MB</td><td><a href="#" style="color:var(--blue-lt);font-size:0.72rem;font-weight:500" onclick="dlReport('OEE April 2025')">↓ Download</a></td></tr>
+        <tr><td style="color:var(--t1);font-weight:500">Sensor Network Health — Week 18</td><td>admin</td><td style="font-family:var(--mono);font-size:0.7rem">2025-05-06</td><td><span class="badge-green">CSV</span></td><td style="font-family:var(--mono);font-size:0.7rem">0.8 MB</td><td><a href="#" style="color:var(--blue-lt);font-size:0.72rem;font-weight:500" onclick="dlReport('Sensor Week 18')">↓ Download</a></td></tr>
+        <tr><td style="color:var(--t1);font-weight:500">Maintenance Summary — Week 17</td><td>admin</td><td style="font-family:var(--mono);font-size:0.7rem">2025-04-28</td><td><span class="badge-blue">PDF</span></td><td style="font-family:var(--mono);font-size:0.7rem">1.1 MB</td><td><a href="#" style="color:var(--blue-lt);font-size:0.72rem;font-weight:500" onclick="dlReport('Maint Week 17')">↓ Download</a></td></tr>
+        <tr><td style="color:var(--t1);font-weight:500">ML Model Report — April 2025</td><td>admin</td><td style="font-family:var(--mono);font-size:0.7rem">2025-05-05</td><td><span class="badge-amber">XLSX</span></td><td style="font-family:var(--mono);font-size:0.7rem">3.2 MB</td><td><a href="#" style="color:var(--blue-lt);font-size:0.72rem;font-weight:500" onclick="dlReport('ML April 2025')">↓ Download</a></td></tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+<script>
+  setInterval(()=>document.getElementById('navClock').textContent=new Date().toTimeString().slice(0,8)+' UTC',1000);
+  function dlReport(name) {
+    const el = document.createElement('div');
+    el.style.cssText='position:fixed;bottom:24px;right:24px;background:#13161e;border:1px solid #2563eb;color:#94a3b8;font-size:0.75rem;padding:12px 16px;border-radius:4px;z-index:9999;font-family:Inter,sans-serif;';
+    el.textContent='↓ Generating: ' + name + '…';
+    document.body.appendChild(el);
+    setTimeout(()=>{el.textContent='✓ ' + name + ' ready';el.style.borderColor='#10b981';el.style.color='#10b981';},1500);
+    setTimeout(()=>el.remove(),3500);
+  }
+</script>
+</body>
+</html>

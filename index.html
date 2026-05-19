@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DigitTwin — Sign In</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { display:flex; align-items:center; justify-content:center; min-height:100vh; background:var(--bg); }
+    .login-shell { display:grid; grid-template-columns:1fr 420px; width:100%; max-width:960px; min-height:540px; border:1px solid var(--border); border-radius:8px; overflow:hidden; }
+    .login-left { background:var(--bg2); padding:48px; display:flex; flex-direction:column; justify-content:space-between; position:relative; overflow:hidden; }
+    .ll-bg { position:absolute; inset:0; background:radial-gradient(ellipse 60% 50% at 20% 80%, rgba(37,99,235,0.08) 0%, transparent 70%), radial-gradient(ellipse 50% 40% at 80% 20%, rgba(13,148,136,0.06) 0%, transparent 70%); }
+    .ll-content { position:relative; z-index:1; }
+    .ll-logo { font-size:1.6rem; font-weight:700; color:var(--t1); letter-spacing:-0.02em; margin-bottom:32px; }
+    .ll-logo span { color:var(--blue-lt); }
+    .ll-heading { font-size:1.8rem; font-weight:700; color:var(--t1); line-height:1.2; margin-bottom:12px; letter-spacing:-0.02em; }
+    .ll-desc { font-size:0.85rem; color:var(--t3); line-height:1.6; max-width:320px; }
+    .ll-stats { display:flex; gap:28px; position:relative; z-index:1; }
+    .ll-stat-val { font-size:1.5rem; font-weight:700; color:var(--t1); line-height:1; margin-bottom:3px; }
+    .ll-stat-lbl { font-size:0.68rem; color:var(--t3); font-weight:500; }
+    .ll-footer { font-size:0.68rem; color:var(--t4); position:relative; z-index:1; }
+    .login-right { background:var(--bg); padding:40px 36px; display:flex; flex-direction:column; justify-content:center; border-left:1px solid var(--border); }
+    .lr-title { font-size:1.1rem; font-weight:700; color:var(--t1); margin-bottom:4px; }
+    .lr-sub { font-size:0.78rem; color:var(--t3); margin-bottom:28px; }
+    .form-field { margin-bottom:16px; }
+    .form-label { display:block; font-size:0.72rem; font-weight:500; color:var(--t2); margin-bottom:6px; }
+    .form-input { width:100%; padding:10px 13px; background:var(--bg2); border:1px solid var(--border); color:var(--t1); font-family:var(--font); font-size:0.85rem; border-radius:4px; outline:none; transition:border-color 0.15s; }
+    .form-input:focus { border-color:var(--blue-lt); box-shadow:0 0 0 3px rgba(37,99,235,0.1); }
+    .form-input::placeholder { color:var(--t4); }
+    .form-hint { font-size:0.65rem; color:var(--t4); margin-top:4px; font-family:var(--mono); }
+    .pw-wrap { position:relative; }
+    .pw-toggle { position:absolute; right:12px; top:50%; transform:translateY(-50%); font-size:0.68rem; color:var(--t3); cursor:pointer; font-weight:500; }
+    .pw-toggle:hover { color:var(--blue-lt); }
+    .login-btn { width:100%; padding:11px; margin-top:6px; background:var(--blue); border:none; color:#fff; font-family:var(--font); font-size:0.82rem; font-weight:600; border-radius:4px; cursor:pointer; transition:background 0.15s; }
+    .login-btn:hover { background:#1d4ed8; }
+    .divider { display:flex; align-items:center; gap:10px; margin:16px 0; }
+    .divider::before, .divider::after { content:''; flex:1; height:1px; background:var(--border); }
+    .divider span { font-size:0.65rem; color:var(--t4); }
+    .guest-btn { width:100%; padding:10px; background:transparent; border:1px solid var(--border); color:var(--t3); font-family:var(--font); font-size:0.78rem; font-weight:500; border-radius:4px; cursor:pointer; transition:all 0.15s; }
+    .guest-btn:hover { border-color:var(--border2); color:var(--t2); background:var(--bg2); }
+    .error-box { background:var(--red-glow); border:1px solid rgba(239,68,68,0.3); color:var(--red-lt); font-size:0.75rem; padding:9px 12px; border-radius:4px; margin-bottom:14px; display:none; }
+    .error-box.show { display:block; }
+    .status-row { display:flex; gap:14px; margin-top:20px; padding-top:16px; border-top:1px solid var(--border); flex-wrap:wrap; }
+    .status-item { display:flex; align-items:center; gap:5px; font-size:0.62rem; color:var(--t4); }
+  </style>
+</head>
+<body>
+  <div class="login-shell fade-in">
+    <div class="login-left">
+      <div class="ll-bg"></div>
+      <div class="ll-content">
+        <div class="ll-logo">Digit<span>Twin</span></div>
+        <div>
+          <div class="ll-heading">Industrial Digital<br>Twin Platform</div>
+          <div class="ll-desc">Unified real-time monitoring, predictive maintenance and engineering simulation across your entire facility.</div>
+        </div>
+      </div>
+      <div class="ll-stats">
+        <div><div class="ll-stat-val">26</div><div class="ll-stat-lbl">Connected Machines</div></div>
+        <div><div class="ll-stat-val">48</div><div class="ll-stat-lbl">Sensor Nodes</div></div>
+        <div><div class="ll-stat-val">99.2%</div><div class="ll-stat-lbl">Platform Uptime</div></div>
+      </div>
+      <div class="ll-footer">DigitTwin v2.5 &nbsp;·&nbsp; Secure Industrial IoT Platform</div>
+    </div>
+    <div class="login-right">
+      <div class="lr-title">Sign in to DigitTwin</div>
+      <div class="lr-sub">Enter your operator credentials to continue</div>
+      <div class="error-box" id="errBox">Invalid credentials. Please try again.</div>
+      <div class="form-field">
+        <label class="form-label" for="uid">Operator ID</label>
+        <input class="form-input" type="text" id="uid" placeholder="Enter operator ID" autocomplete="off">
+        <div class="form-hint">// demo: admin</div>
+      </div>
+      <div class="form-field">
+        <label class="form-label" for="pwd">Password</label>
+        <div class="pw-wrap">
+          <input class="form-input" type="password" id="pwd" placeholder="Enter password">
+          <span class="pw-toggle" id="pwToggle" onclick="togglePw()">Show</span>
+        </div>
+        <div class="form-hint">// demo: admin123</div>
+      </div>
+      <button class="login-btn" onclick="doLogin()">Sign In</button>
+      <div class="divider"><span>or</span></div>
+      <button class="guest-btn" onclick="guestLogin()">Continue as Guest Observer</button>
+      <div class="status-row">
+        <div class="status-item"><span class="dot dot-pulse" style="background:var(--green-lt)"></span>Smart Factory</div>
+        <div class="status-item"><span class="dot dot-pulse" style="background:var(--blue-lt)"></span>Pred. Maintenance</div>
+        <div class="status-item"><span class="dot dot-pulse" style="background:var(--teal-lt)"></span>MECHSIM</div>
+        <div class="status-item"><span class="dot dot-pulse" style="background:var(--amber-lt)"></span>OptimalPrint</div>
+      </div>
+    </div>
+  </div>
+  <script>
+    document.addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+    function togglePw() {
+      const i=document.getElementById('pwd'), t=document.getElementById('pwToggle');
+      i.type=i.type==='password'?'text':'password';
+      t.textContent=i.type==='password'?'Show':'Hide';
+    }
+    function doLogin() {
+      const u=document.getElementById('uid').value.trim();
+      const p=document.getElementById('pwd').value.trim();
+      const btn=document.querySelector('.login-btn');
+      const err=document.getElementById('errBox');
+      if((u==='admin'&&p==='admin123')||u==='observer'){
+        btn.textContent='Signing in…'; btn.style.opacity='0.7';
+        setTimeout(()=>window.location.href='loading.html',900);
+      } else {
+        err.classList.add('show');
+        setTimeout(()=>err.classList.remove('show'),3000);
+      }
+    }
+    function guestLogin() {
+      document.getElementById('uid').value='observer';
+      document.getElementById('pwd').value='guest';
+      doLogin();
+    }
+  </script>
+</body>
+</html>
